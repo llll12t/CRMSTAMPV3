@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="th">
-
 <head>
   <meta charset="UTF-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
@@ -118,6 +117,7 @@
 
   <!-- Template: Dashboard (Main Menu) -->
   <template id="view-dashboard">
+    <!-- Main Menu -->
     <div class="glass-white rounded-2xl p-4 grid grid-cols-3 gap-3 text-center text-sm font-medium mb-6">
       <a href="#event" class="bg-white text-black p-3 rounded-2xl flex flex-col items-center justify-center space-y-1">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -172,6 +172,24 @@
       </a>
     </div>
 
+    <!-- [เพิ่ม] ส่วนของบัตรสะสมแต้มกาแฟ -->
+    <div class="bg-amber-50 rounded-2xl p-4 mb-6 shadow-md">
+      <div id="stampCard" class="grid grid-cols-5 gap-3">
+        <!-- ตัวอย่าง UI ขณะโหลด -->
+        <div class="aspect-square rounded-xl bg-gray-200 animate-pulse"></div>
+        <div class="aspect-square rounded-xl bg-gray-200 animate-pulse"></div>
+        <div class="aspect-square rounded-xl bg-gray-200 animate-pulse"></div>
+        <div class="aspect-square rounded-xl bg-gray-200 animate-pulse"></div>
+        <div class="aspect-square rounded-xl bg-gray-200 animate-pulse"></div>
+        <div class="aspect-square rounded-xl bg-gray-200 animate-pulse"></div>
+        <div class="aspect-square rounded-xl bg-gray-200 animate-pulse"></div>
+        <div class="aspect-square rounded-xl bg-gray-200 animate-pulse"></div>
+        <div class="aspect-square rounded-xl bg-gray-200 animate-pulse"></div>
+        <div class="aspect-square rounded-xl bg-gray-200 animate-pulse"></div>
+      </div>
+    </div>
+
+    <!-- Checkin Box -->
     <div id="checkinBox" class="flex items-center justify-between mb-8 hidden">
       <div class="bg-gray-100 rounded-full px-4 py-2 flex items-center space-x-2 text-gray-700">
         <span class="text-sm">วันที่</span><span id="todayDate" class="font-bold text-md">00</span>
@@ -181,6 +199,7 @@
       <button id="checkinBtn" class="btn btn-neutral btn-sm">เช็คอิน</button>
     </div>
 
+    <!-- History List -->
     <div>
       <div class="flex justify-between items-center mb-4">
         <div class="font-bold text-lg">รายการล่าสุด</div>
@@ -323,8 +342,8 @@
   <script>
     // --- GLOBAL STATE & CACHE ---
     let liffInitialized = false;
-    // [MODIFIED] Added totalPoints to user state
-    const userState = { profile: null, lineId: "", points: 0, totalPoints: 0, pointsChanged: false, level: "Member", customTag: "" };
+    // [แก้ไข] เพิ่ม coffeeStamps ใน userState
+    const userState = { profile: null, lineId: "", points: 0, totalPoints: 0, coffeeStamps: 0, pointsChanged: false, level: "Member", customTag: "" };
     const dataCache = { events: null, redeemItems: null, eventDetails: {}, userProfileFull: null, history: null, levelSettings: null };
     let warehousePollingInterval = null;
 
@@ -359,7 +378,6 @@
     }
 
     // --- DATA & STATE MANAGEMENT ---
-    // [MODIFIED] Calculates level progress based on total accumulated points.
     function calculateLevelAndProgress(totalAccumulatedPoints) {
       const vipPoints = dataCache.levelSettings?.VIP_points || 5000;
       const superPoints = dataCache.levelSettings?.SUPER_points || 10000;
@@ -368,7 +386,7 @@
       if (totalAccumulatedPoints >= superPoints) {
         level = 'Super';
         currentLevelMin = superPoints;
-        nextLevelMin = totalAccumulatedPoints; // At max level
+        nextLevelMin = totalAccumulatedPoints; 
         nextLevelName = '';
       } else if (totalAccumulatedPoints >= vipPoints) {
         level = 'VIP';
@@ -379,7 +397,6 @@
 
       const pointsInCurrentTier = totalAccumulatedPoints - currentLevelMin;
       const pointsToNextTier = nextLevelMin - currentLevelMin;
-
       let progressValue = 0;
       let pointsNeeded = 0;
 
@@ -404,15 +421,16 @@
         const userRes = await fetch(`${CONFIG.GAS_URL}?action=getUserInfo&lineId=${userState.lineId}`);
         const userData = await userRes.json();
         if (userData && !userData.error) {
-          // [MODIFIED] Update all relevant user states
+          // [แก้ไข] อัปเดตข้อมูลผู้ใช้ทั้งหมด รวมถึงแสตมป์
           userState.points = parseInt(userData.point || 0, 10);
           userState.totalPoints = parseInt(userData.totalPoints || 0, 10);
+          userState.coffeeStamps = parseInt(userData.coffeeStamps || 0, 10); // <-- เพิ่มการอัปเดตแสตมป์
           userState.level = userData.level || 'Member';
           userState.customTag = userData.customTag || '';
           dataCache.userProfileFull = userData;
           pointValEl.textContent = userState.points;
           userState.pointsChanged = true;
-          console.log(`User state updated: Points=${userState.points}, TotalPoints=${userState.totalPoints}, Level=${userState.level}`);
+          console.log(`User state updated: Points=${userState.points}, TotalPoints=${userState.totalPoints}, Stamps=${userState.coffeeStamps}`);
         } else { console.error("Failed to fetch user data after action:", userData?.error || "Unknown error"); }
       } catch (e) { console.error("Error fetching user info after action:", e); }
     }
@@ -445,9 +463,10 @@
         else { console.warn("Failed to load level settings, using defaults."); dataCache.levelSettings = { VIP_points: 5000, SUPER_points: 10000 }; }
         if (!userData || !userData.isRegistered) { window.location.href = 'Register.html'; return false; }
 
-        // [MODIFIED] Store both spendable and total points
+        // [แก้ไข] ดึงข้อมูลผู้ใช้ทั้งหมด รวมถึงแสตมป์
         userState.points = parseInt(userData.point || 0, 10);
         userState.totalPoints = parseInt(userData.totalPoints || 0, 10);
+        userState.coffeeStamps = parseInt(userData.coffeeStamps || 0, 10); // <-- เพิ่มการดึงแสตมป์
         userState.level = userData.level || 'Member';
         userState.customTag = userData.customTag || '';
         dataCache.userProfileFull = userData;
@@ -460,7 +479,7 @@
 
     // --- ROUTER ---
     const routes = {
-      '#dashboard': { title: 'CRM-3RN', tpl: 'view-dashboard', init: initDashboard },
+      '#dashboard': { title: 'หน้าหลัก', tpl: 'view-dashboard', init: initDashboard },
       '#event': { title: 'กิจกรรม', tpl: 'view-event', init: initEvent },
       '#event-detail': { title: 'รายละเอียดกิจกรรม', tpl: 'view-event-detail', init: initEventDetail },
       '#profile': { title: 'โปรไฟล์ของคุณ', tpl: 'view-profile', init: initProfile },
@@ -468,7 +487,7 @@
       '#transfer': { title: 'โอนพ้อยให้เพื่อน', tpl: 'view-transfer', init: initTransfer },
       '#warehouse': { title: 'คลังของรางวัล', tpl: 'view-warehouse', init: initWarehouse },
       '#addpoint': { title: 'โค้ดเพื่อรับรางวัล', tpl: 'view-addpoint', init: initAddpoint },
-      '': { title: 'CRM-3RN', tpl: 'view-dashboard', init: initDashboard }
+      '': { title: 'หน้าหลัก', tpl: 'view-dashboard', init: initDashboard }
     };
     async function router() {
       if (warehousePollingInterval) {
@@ -511,9 +530,95 @@
         } catch (e) { console.error("Error fetching history:", e); dataCache.history = []; userState.pointsChanged = false; }
       } return dataCache.history;
     }
+    
+    // --- [เพิ่ม] STAMP CARD FUNCTIONS ---
+    async function handleRedeemFreeCoffee() {
+      if (!(await showConfirm('แลกกาแฟฟรี', 'ยินดีด้วย! คุณสะสมครบ 10 ดวงแล้ว แลกรับกาแฟฟรี 1 แก้วเลยไหม?'))) {
+        return;
+      }
+      
+      const redeemButton = document.querySelector('#stampCard button');
+      if (redeemButton) {
+          redeemButton.disabled = true;
+          redeemButton.innerHTML = `<span class="loading loading-spinner loading-sm"></span>`;
+      }
+
+      try {
+        const res = await fetch(CONFIG.GAS_URL, {
+          method: 'POST',
+          body: JSON.stringify({ action: "redeemStampReward", lineId: userState.lineId })
+        });
+        const result = await res.json();
+
+        if (result.success) {
+          showAlert('แลกสำเร็จ!', 'กาแฟฟรี 1 แก้วถูกเพิ่มไปยัง "คลัง" ของคุณแล้ว ไปที่เมนูคลังเพื่อรับของได้เลย!', async () => {
+            await fetchAndUpdateUserState();
+            router(); // ใช้ router() เพื่อ re-render หน้า dashboard ทั้งหมด
+          });
+        } else {
+          throw new Error(result.error || 'การแลกของรางวัลล้มเหลว');
+        }
+      } catch (e) {
+        console.error("Redeem free coffee failed:", e);
+        showAlert('เกิดข้อผิดพลาด', 'ไม่สามารถแลกของรางวัลได้ กรุณาลองใหม่อีกครั้ง');
+        if (redeemButton) {
+          redeemButton.disabled = false;
+          renderStampCard(); 
+        }
+      }
+    }
+    
+    function renderStampCard() {
+      const stampCardEl = document.getElementById('stampCard');
+      if (!stampCardEl) return;
+
+      stampCardEl.innerHTML = ''; 
+      const stamps = userState.coffeeStamps || 0;
+      const totalStamps = 10;
+      
+      const filledIcon = `<svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" viewBox="0 0 24 24"><path fill="currentColor" d="M18.5 3H6c-1.1 0-2 .9-2 2v5.71c0 3.83 2.95 7.18 6.78 7.29c3.96.12 7.22-3.06 7.22-7v-1h.5c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2m-1 2v3h-2V5zM6 5h7v5c0 2.21-1.79 4-4 4s-4-1.79-4-4V5z"/></svg>`;
+      const emptyIcon = `<svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M18.5 3H6a2 2 0 0 0-2 2v5.71c0 3.83 2.95 7.18 6.78 7.29c3.96.12 7.22-3.06 7.22-7v-1h.5a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2m-1 2v3h-2V5M6 5h7v5a4 4 0 1 1-8 0z"/></svg>`;
+      const giftIcon = `<svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" viewBox="0 0 24 24"><path fill="currentColor" d="M19 12h-2V8h-2v4h-2V8h-2v4H9V8H7v4H5v9h14zM5 7h14c0-2.76-2.24-5-5-5h-4c-2.76 0-5 2.24-5 5"/></svg>`;
+      
+      for (let i = 1; i <= totalStamps; i++) {
+        const isLastStamp = (i === totalStamps);
+        const isFilled = (i <= stamps);
+        
+        let iconHtml;
+        let containerClasses = 'aspect-square rounded-xl flex items-center justify-center transition-all';
+        let element;
+
+        if (isLastStamp) {
+          iconHtml = giftIcon;
+          if (stamps >= totalStamps) {
+             containerClasses += ' bg-red-500 text-white cursor-pointer hover:bg-red-600 shadow-lg animate-pulse';
+             element = document.createElement('button');
+             element.setAttribute('aria-label', 'แลกกาแฟฟรี');
+             element.onclick = handleRedeemFreeCoffee;
+          } else {
+             containerClasses += ' bg-white text-gray-400 border border-dashed border-gray-300';
+             element = document.createElement('div');
+          }
+        } else {
+          if (isFilled) {
+            iconHtml = filledIcon;
+            containerClasses += ' bg-stone-800 text-white';
+          } else {
+            iconHtml = emptyIcon;
+            containerClasses += ' bg-white text-stone-800 border border-gray-300';
+          }
+          element = document.createElement('div');
+        }
+
+        element.className = containerClasses;
+        element.innerHTML = iconHtml;
+        stampCardEl.appendChild(element);
+      }
+    }
 
     // --- VIEW INITIALIZATION FUNCTIONS ---
     async function initDashboard() {
+      renderStampCard(); // <-- [เพิ่ม] เรียกใช้ฟังก์ชันวาดบัตรสะสม
       const historyListEl = document.getElementById('historyList'), checkinBox = document.getElementById('checkinBox'), todayDateEl = document.getElementById('todayDate'), checkinBtn = document.getElementById('checkinBtn');
       if (dataCache.history && !userState.pointsChanged) renderHistoryList(dataCache.history);
       else if (historyListEl) historyListEl.innerHTML = generateListSkeleton(5);
@@ -534,11 +639,9 @@
       } catch (e) { console.error("Error in initDashboard:", e); if (historyListEl) historyListEl.innerHTML = `<li class="text-center text-red-500 py-4">เกิดข้อผิดพลาด</li>`; }
     }
 
-    // [LATEST VERSION] Displays all events with correct level tags and button states.
     async function initEvent() {
       const eventListEl = document.getElementById('eventList');
       if (eventListEl) eventListEl.innerHTML = generateListSkeleton(5);
-
       let events = dataCache.events || [];
       if (!dataCache.events) {
         try {
@@ -552,17 +655,13 @@
           return;
         }
       }
-
       if (!events || events.length === 0) {
         eventListEl.innerHTML = `<div class="text-center text-gray-400 py-8">ไม่มีกิจกรรมในขณะนี้</div>`;
         return;
       }
-
       eventListEl.innerHTML = events.map(e => {
         let isUserAllowed = false;
         let levelTagHTML = '';
-
-        // Check if allowedLevels is a non-empty string
         const hasLevelRestriction = typeof e.allowedLevels === 'string' && e.allowedLevels.trim() !== '';
 
         if (hasLevelRestriction) {
@@ -572,7 +671,7 @@
           }
           levelTagHTML = `<div class="badge badge-outline badge-sm mt-2">สำหรับ: ${e.allowedLevels}</div>`;
         } else {
-          isUserAllowed = true; // No restriction
+          isUserAllowed = true; 
         }
 
         const buttonHTML = isUserAllowed
@@ -594,7 +693,6 @@
       }).join('');
     }
 
-    // [LATEST VERSION] Handles button clicks correctly and checks levels safely.
     async function initEventDetail() {
       const params = new URLSearchParams(window.location.hash.split('?')[1]);
       const eventId = params.get("id");
@@ -619,9 +717,7 @@
         titleEl.textContent = "ไม่พบกิจกรรม"; descEl.textContent = eventData.error; joinBtn.disabled = true;
       } else {
         titleEl.textContent = eventData.title; pointEl.textContent = `${eventData.point}+`; descEl.textContent = eventData.desc;
-
         const hasJoined = history.some(item => item.type === 'event' && item.eventId === eventId);
-
         let isLevelAllowed = false;
         const hasLevelRestriction = typeof eventData.allowedLevels === 'string' && eventData.allowedLevels.trim() !== '';
 
@@ -631,7 +727,7 @@
             isLevelAllowed = true;
           }
         } else {
-          isLevelAllowed = true; // No restriction
+          isLevelAllowed = true; 
         }
 
         if (hasJoined) {
@@ -641,7 +737,6 @@
           joinBtn.textContent = `สำหรับระดับ ${eventData.allowedLevels}`;
           joinBtn.disabled = true;
         } else {
-          // Correct button click logic
           joinBtn.onclick = async () => {
             if (!(await showConfirm('ยืนยัน', `เข้าร่วม "${eventData.title}" และรับ ${eventData.point} พ้อยต์?`))) return;
             joinBtn.disabled = true;
@@ -656,9 +751,8 @@
                 if (text.includes("สำเร็จ")) {
                   await fetchAndUpdateUserState();
                   joinBtn.textContent = "รับพ้อยต์แล้ว";
-                  joinBtn.disabled = true; // Keep it disabled
+                  joinBtn.disabled = true; 
                 } else {
-                  // Also keep it disabled if already claimed
                   joinBtn.textContent = "รับพ้อยต์แล้ว";
                   joinBtn.disabled = true;
                 }
@@ -667,7 +761,7 @@
               console.error("Join event failed:", e);
               showAlert('ข้อผิดพลาด', 'ไม่สามารถเข้าร่วมได้');
               joinBtn.textContent = "เข้าร่วม";
-              joinBtn.disabled = false; // Re-enable only on network error
+              joinBtn.disabled = false;
             }
           };
         }
@@ -675,20 +769,15 @@
       cardSkeleton.classList.add("hidden"); card.classList.remove("hidden");
     }
 
-    // [MODIFIED] Uses totalPoints for level calculation and display.
     async function initProfile() {
       const dpEl = document.getElementById('profileDisplayPicture'), dnEl = document.getElementById('profileDisplayName'), lineIdEl = document.getElementById('profileLineId'), levelBadgeEl = document.getElementById('profileLevelBadge'), tagBadgeEl = document.getElementById('profileCustomTagBadge'), progressEl = document.getElementById('profileProgressBar'), progressTextEl = document.getElementById('profilePointsToNextLevel'), totalPointsEl = document.getElementById('profileTotalPoints'), nameEl = document.getElementById('profileName'), phoneEl = document.getElementById('profilePhone'), emailEl = document.getElementById('profileEmail'), addressEl = document.getElementById('profileAddress'), noteEl = document.getElementById('profileNote'), editBtn = document.getElementById('editProfileBtn'), formContainer = document.getElementById('profileFormContainer'), editButtonsDiv = document.getElementById('profileEditButtons'), saveBtn = document.getElementById('saveProfileBtn'), cancelBtn = document.getElementById('cancelEditBtn');
       const editableInputs = [nameEl, phoneEl, emailEl, addressEl, noteEl]; let initialData = {};
 
       dpEl.src = userState.profile.pictureUrl || 'https://via.placeholder.com/96';
       dnEl.textContent = userState.profile.displayName || 'ผู้ใช้ LINE';
-
-      // Display total accumulated points for level context
       totalPointsEl.textContent = userState.totalPoints.toLocaleString();
-      // [เพิ่ม] แสดงพ้อยคงเหลือ
       const currentPointsEl = document.getElementById('profileCurrentPoints');
       if (currentPointsEl) currentPointsEl.textContent = userState.points.toLocaleString();
-      // Calculate level and progress based on total accumulated points
       const { progressValue, pointsToNext, nextLevelName } = calculateLevelAndProgress(userState.totalPoints);
 
       setBadgeContent(levelBadgeEl, LEVEL_STYLES[userState.level]?.text || userState.level, `badge badge-lg ${LEVEL_STYLES[userState.level]?.class || ''}`);
@@ -915,8 +1004,8 @@
         }
 
         warehouseListEl.innerHTML = ownedItems.map(item => {
-            let statusBlockHTML = ''; // ส่วนด้านขวาบน (สถานะ/ปุ่ม)
-            let detailsBlockHTML = ''; // ส่วนด้านขวาล่าง (วันที่รับ/ส่ง/tracking)
+            let statusBlockHTML = ''; 
+            let detailsBlockHTML = ''; 
 
             switch (item.status) {
                 case 'claimed':
@@ -925,7 +1014,6 @@
                     break;
                 case 'shipped':
                     statusBlockHTML = `<div class="badge badge-info">จัดส่งแล้ว</div>`;
-                    // ตรวจสอบว่ามี tracking number หรือไม่
                     if (item.expressTracking && String(item.expressTracking).trim() !== '') {
                         detailsBlockHTML = `
                             <div class="text-xs text-gray-500">วันที่จัดส่ง: ${item.claimDate || '-'}</div>
@@ -938,20 +1026,17 @@
                 case 'pending_claim':
                 default:
                     statusBlockHTML = `<button class="btn btn-neutral btn-sm claim-btn" data-unique-id="${item.uniqueId}" data-item-name="${item.itemName}">รับของ</button>`;
-                    detailsBlockHTML = `<div class="badge badge-warning badge-outline">รอรับ</div>`; // แสดงเป็นป้ายสถานะแทน
+                    detailsBlockHTML = `<div class="badge badge-warning badge-outline">รอรับ</div>`;
                     break;
             }
 
-            // [แก้ไข] ใช้ Flexbox เพื่อสร้าง Layout 2 คอลัมน์
             return `
                 <li class="bg-white p-4 rounded-lg shadow-sm">
                     <div class="flex justify-between items-start space-x-4">
-                        <!-- คอลัมน์ซ้าย -->
                         <div class="flex-grow">
                             <div class="font-semibold text-gray-800">${item.itemName}</div>
                             <div class="text-xs text-gray-500 mt-2">วันที่แลก: ${item.redeemDate}</div>
                         </div>
-                        <!-- คอลัมน์ขวา -->
                         <div class="flex-shrink-0 text-right space-y-2">
                             <div class="flex justify-end">
                                 ${statusBlockHTML}
@@ -963,7 +1048,6 @@
 
         }).join('');
 
-        // ผูก event click กับปุ่ม "รับของ" ใหม่
         document.querySelectorAll('.claim-btn').forEach(button => {
             button.addEventListener('click', handleClaimButtonClick);
         });
