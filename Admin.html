@@ -25,7 +25,7 @@
     #qr-shaded-region{ border-width:0 !important ; }
     .hidden { display: none !important; }
     
-    /* [NEW] Modern Loading Spinner */
+    /* Modern Loading Spinner */
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     .loading-spinner {
       border: 4px solid rgba(0, 0, 0, 0.1);
@@ -190,13 +190,13 @@
                     </div>
                 </div>
   
-                <!-- Section 3: Add Coffee Stamp Option -->
+                <!-- Section 3: Add STAMPS Option (Number Input) -->
                 <div class="form-control mt-6 border-t pt-4">
-                    <label class="cursor-pointer label justify-start gap-4">
-                      <input type="checkbox" id="addCoffeeStamp" class="checkbox checkbox-primary" />
-                      <span class="label-text font-semibold text-lg">ให้แสตมป์กาแฟ 1 ดวง</span> 
+                    <label class="label"><span class="label-text font-semibold text-lg">ให้แสตมป์เพิ่มเติม (ถ้ามี)</span></label>
+                    <input type="number" id="addStampsAmount" class="input input-bordered" placeholder="กรอกจำนวนแสตมป์" value="0" min="0" />
+                    <label class="label">
+                        <span class="label-text-alt">ใส่ 0 หากไม่ต้องการให้แสตมป์</span>
                     </label>
-                    <p class="text-xs text-gray-500 mt-1 ml-10">ติ๊กช่องนี้เมื่อรายการที่ให้แต้มมี "กาแฟ" หรือเครื่องดื่มที่เข้าร่วมรายการสะสมแสตมป์</p>
                 </div>
   
                 <!-- Section 4: Submit Button -->
@@ -494,42 +494,57 @@
         form.onsubmit = async (e) => {
             e.preventDefault();
             const identifier = document.getElementById('addPointsIdentifier').value.trim();
-            const giveStamp = document.getElementById('addCoffeeStamp').checked; 
+            const stampsToAdd = parseInt(document.getElementById('addStampsAmount').value, 10) || 0;
 
             if (!identifier) return showAlert('ข้อมูลไม่ครบ', 'กรุณาระบุลูกค้า');
             
             let payload = { 
                 identifier,
-                giveStamp: giveStamp
+                stampsToAdd: stampsToAdd
             };
             let confirmMessage = '', totalPoints = 0;
 
             if (currentMode === 'product') {
-                if (billItems.length === 0) return showAlert('ข้อมูลไม่ครบ', 'กรุณาเพิ่มสินค้าลงในบิล');
+                if (billItems.length === 0 && stampsToAdd === 0) return showAlert('ข้อมูลไม่ครบ', 'กรุณาเพิ่มสินค้าหรือกรอกจำนวนแสตมป์');
                 payload.itemsPurchased = billItems.map(item => ({ productId: item.id, quantity: item.quantity }));
                 totalPoints = billItems.reduce((sum, item) => sum + (item.points * item.quantity), 0);
                 const itemSummary = billItems.map(item => `${item.name} x${item.quantity}`).join(',\n');
-                confirmMessage = `ยืนยันให้ ${totalPoints} แต้ม\nจาก:\n${itemSummary}\n\nสำหรับผู้ใช้: "${identifier}"?`;
+                if (totalPoints > 0) {
+                    confirmMessage = `ยืนยันให้ ${totalPoints} แต้ม\nจาก:\n${itemSummary}\n\nสำหรับผู้ใช้: "${identifier}"?`;
+                } else {
+                    confirmMessage = `ยืนยันการทำรายการสำหรับผู้ใช้ "${identifier}"?`;
+                }
             } else {
                 const points = document.getElementById('addPointsAmount').value;
                 const reason = document.getElementById('addPointsReason').value.trim();
-                if (!points || parseInt(points) < 1 || !reason) return showAlert('ข้อมูลไม่ครบ', 'กรุณากรอกแต้มและเหตุผล');
-                payload.points = parseInt(points, 10); payload.reason = reason;
+                if ((!points || parseInt(points) < 1) && stampsToAdd === 0) return showAlert('ข้อมูลไม่ครบ', 'กรุณากรอกแต้มหรือจำนวนแสตมป์');
+                if (points > 0 && !reason) return showAlert('ข้อมูลไม่ครบ', 'กรุณากรอกเหตุผลสำหรับการให้แต้ม');
+                
+                payload.points = parseInt(points, 10) || 0; 
+                payload.reason = reason;
                 totalPoints = payload.points;
-                confirmMessage = `ยืนยันให้ ${totalPoints} แต้ม\nเหตุผล: ${payload.reason}\n\nสำหรับผู้ใช้: "${identifier}"?`;
+                if (totalPoints > 0) {
+                    confirmMessage = `ยืนยันให้ ${totalPoints} แต้ม\nเหตุผล: ${payload.reason}\n\nสำหรับผู้ใช้: "${identifier}"?`;
+                } else {
+                    confirmMessage = `ยืนยันการทำรายการสำหรับผู้ใช้ "${identifier}"?`;
+                }
             }
 
-            if(giveStamp) {
-                confirmMessage += "\n\nและให้แสตมป์กาแฟ 1 ดวง";
+            if (stampsToAdd > 0) {
+                confirmMessage += `${totalPoints > 0 ? '\n' : ''}\nและให้แสตมป์เพิ่ม ${stampsToAdd} ดวง`;
             }
 
             if (await showConfirm('ยืนยันการให้แต้ม', confirmMessage)) {
                 submitBtn.classList.add('loading'); submitBtn.disabled = true;
                 try {
                     const message = await postData('addPointsToUser', payload);
-                    showAlert('สำเร็จ', message || 'เพิ่มแต้มเรียบร้อยแล้ว');
-                    form.reset(); billItems = []; renderBill(); updateProductDropdown();
-                } catch(e) { /* handled */ } finally {
+                    showAlert('สำเร็จ', message || 'ทำรายการเรียบร้อยแล้ว');
+                    form.reset();
+                    document.getElementById('addStampsAmount').value = 0;
+                    billItems = []; 
+                    renderBill(); 
+                    updateProductDropdown();
+                } catch(e) { /* handled by postData */ } finally {
                     submitBtn.classList.remove('loading'); submitBtn.disabled = false;
                 }
             }
