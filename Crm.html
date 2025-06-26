@@ -172,10 +172,9 @@
       </a>
     </div>
 
-    <!-- [เพิ่ม] ส่วนของบัตรสะสมแต้มกาแฟ -->
     <div class="bg-amber-50 rounded-2xl p-4 mb-6 shadow-md">
       <div id="stampCard" class="grid grid-cols-5 gap-3">
-        <!-- ตัวอย่าง UI ขณะโหลด -->
+        <!-- Stamp icons will be generated here by JavaScript -->
         <div class="aspect-square rounded-xl bg-gray-200 animate-pulse"></div>
         <div class="aspect-square rounded-xl bg-gray-200 animate-pulse"></div>
         <div class="aspect-square rounded-xl bg-gray-200 animate-pulse"></div>
@@ -189,7 +188,6 @@
       </div>
     </div>
 
-    <!-- Checkin Box -->
     <div id="checkinBox" class="flex items-center justify-between mb-8 hidden">
       <div class="bg-gray-100 rounded-full px-4 py-2 flex items-center space-x-2 text-gray-700">
         <span class="text-sm">วันที่</span><span id="todayDate" class="font-bold text-md">00</span>
@@ -199,7 +197,6 @@
       <button id="checkinBtn" class="btn btn-neutral btn-sm">เช็คอิน</button>
     </div>
 
-    <!-- History List -->
     <div>
       <div class="flex justify-between items-center mb-4">
         <div class="font-bold text-lg">รายการล่าสุด</div>
@@ -209,12 +206,10 @@
     </div>
   </template>
 
-  <!-- Template: Event List -->
   <template id="view-event">
     <div id="eventList" class="space-y-3"></div>
   </template>
 
-  <!-- Template: Event Detail -->
   <template id="view-event-detail">
     <div id="cardWrapper">
       <div id="cardSkeleton" class="bg-white p-6 rounded-lg shadow-md mb-6 animate-pulse">
@@ -234,7 +229,6 @@
     </div>
   </template>
 
-  <!-- Template: Profile -->
   <template id="view-profile">
     <div class="space-y-4">
       <div class="glass-white p-6 rounded-lg text-center shadow-md">
@@ -278,14 +272,12 @@
     </div>
   </template>
 
-  <!-- Template: Redeem -->
   <template id="view-redeem">
     <div class="p-0">
       <ul id="redeemList" class="grid grid-cols-2 gap-4"></ul>
     </div>
   </template>
 
-  <!-- Template: Transfer -->
   <template id="view-transfer">
     <div class="space-y-4 mb-6">
       <input id="transferTo" placeholder="LINE ID เพื่อน / เบอร์โทรปลายทาง" type="text"
@@ -296,12 +288,10 @@
     </div>
   </template>
 
-  <!-- Template: Warehouse -->
   <template id="view-warehouse">
     <ul id="warehouseList" class="space-y-3"></ul>
   </template>
 
-  <!-- Template: Add Points (Scan/Manual Code) -->
   <template id="view-addpoint">
     <div id="scanContainer" class="space-y-4 mb-6">
       <button id="scanBtn" class="btn btn-neutral w-full">สแกน QR Code</button>
@@ -313,7 +303,6 @@
     </div>
   </template>
 
-  <!-- Shipping Form Dialog (for Physical Items) -->
   <dialog id="shippingFormDialog" class="modal">
     <div class="modal-box">
       <h3 id="shippingFormTitle" class="font-bold text-lg mb-4">ข้อมูลสำหรับจัดส่ง</h3>
@@ -342,7 +331,6 @@
   <script>
     // --- GLOBAL STATE & CACHE ---
     let liffInitialized = false;
-    // [แก้ไข] เพิ่ม coffeeStamps ใน userState
     const userState = { profile: null, lineId: "", points: 0, totalPoints: 0, coffeeStamps: 0, pointsChanged: false, level: "Member", customTag: "" };
     const dataCache = { events: null, redeemItems: null, eventDetails: {}, userProfileFull: null, history: null, levelSettings: null };
     let warehousePollingInterval = null;
@@ -366,14 +354,14 @@
     function showAlert(title, message, cb) {
       alertT.textContent = title; alertM.textContent = message; alertDialog.showModal();
       const hide = () => { alertDialog.close(); alertBtn.removeEventListener('click', hide); cb && cb(); };
-      alertBtn.addEventListener('click', hide);
+      alertBtn.addEventListener('click', hide, { once: true });
     }
     function showConfirm(title, message) {
       return new Promise(res => {
         confT.textContent = title; confM.textContent = message; confirmDialog.showModal();
         const onOk = () => { cleanup(); res(true); }; const onNo = () => { cleanup(); res(false); };
         function cleanup() { confirmDialog.close(); okBtn.removeEventListener('click', onOk); noBtn.removeEventListener('click', onNo); }
-        okBtn.addEventListener('click', onOk); noBtn.addEventListener('click', onNo);
+        okBtn.addEventListener('click', onOk, { once: true }); noBtn.addEventListener('click', onNo, { once: true });
       });
     }
 
@@ -421,10 +409,9 @@
         const userRes = await fetch(`${CONFIG.GAS_URL}?action=getUserInfo&lineId=${userState.lineId}`);
         const userData = await userRes.json();
         if (userData && !userData.error) {
-          // [แก้ไข] อัปเดตข้อมูลผู้ใช้ทั้งหมด รวมถึงแสตมป์
           userState.points = parseInt(userData.point || 0, 10);
           userState.totalPoints = parseInt(userData.totalPoints || 0, 10);
-          userState.coffeeStamps = parseInt(userData.coffeeStamps || 0, 10); // <-- เพิ่มการอัปเดตแสตมป์
+          userState.coffeeStamps = parseInt(userData.coffeeStamps || 0, 10);
           userState.level = userData.level || 'Member';
           userState.customTag = userData.customTag || '';
           dataCache.userProfileFull = userData;
@@ -456,27 +443,28 @@
           fetch(`${CONFIG.GAS_URL}?action=getItems`),
           fetch(`${CONFIG.GAS_URL}?action=getLevelConfig`)
         ]);
-        const userData = await userRes.json(); const historyData = await histRes.json();
-        dataCache.events = await eventsRes.json(); dataCache.redeemItems = await redeemRes.json();
+        const userData = await userRes.json();
+        if (!userData || !userData.isRegistered) { window.location.href = 'Register.html'; return false; }
+        
+        dataCache.history = await histRes.json();
+        dataCache.events = await eventsRes.json(); 
+        dataCache.redeemItems = await redeemRes.json();
         const settingsData = await settingsRes.json();
         if (settingsData && !settingsData.error) { dataCache.levelSettings = { VIP_points: parseInt(settingsData.VIP_points || 0), SUPER_points: parseInt(settingsData.SUPER_points || 0) }; }
-        else { console.warn("Failed to load level settings, using defaults."); dataCache.levelSettings = { VIP_points: 5000, SUPER_points: 10000 }; }
-        if (!userData || !userData.isRegistered) { window.location.href = 'Register.html'; return false; }
+        else { dataCache.levelSettings = { VIP_points: 5000, SUPER_points: 10000 }; }
 
-        // [แก้ไข] ดึงข้อมูลผู้ใช้ทั้งหมด รวมถึงแสตมป์
         userState.points = parseInt(userData.point || 0, 10);
         userState.totalPoints = parseInt(userData.totalPoints || 0, 10);
-        userState.coffeeStamps = parseInt(userData.coffeeStamps || 0, 10); // <-- เพิ่มการดึงแสตมป์
+        userState.coffeeStamps = parseInt(userData.coffeeStamps || 0, 10);
         userState.level = userData.level || 'Member';
         userState.customTag = userData.customTag || '';
         dataCache.userProfileFull = userData;
         pointValEl.textContent = userState.points;
-        dataCache.history = historyData;
         userState.pointsChanged = false;
       } catch (error) { console.error("Failed to fetch initial data:", error); pointValEl.textContent = 'N/A'; showAlert("ข้อผิดพลาด", "ไม่สามารถโหลดข้อมูลผู้ใช้ได้ กรุณาลองใหม่"); return false; }
       return true;
     }
-
+    
     // --- ROUTER ---
     const routes = {
       '#dashboard': { title: 'หน้าหลัก', tpl: 'view-dashboard', init: initDashboard },
@@ -531,40 +519,26 @@
       } return dataCache.history;
     }
     
-    // --- [เพิ่ม] STAMP CARD FUNCTIONS ---
+    // --- STAMP CARD FUNCTIONS ---
     async function handleRedeemFreeCoffee() {
       if (!(await showConfirm('แลกกาแฟฟรี', 'ยินดีด้วย! คุณสะสมครบ 10 ดวงแล้ว แลกรับกาแฟฟรี 1 แก้วเลยไหม?'))) {
         return;
       }
-      
       const redeemButton = document.querySelector('#stampCard button');
-      if (redeemButton) {
-          redeemButton.disabled = true;
-          redeemButton.innerHTML = `<span class="loading loading-spinner loading-sm"></span>`;
-      }
-
+      if (redeemButton) { redeemButton.disabled = true; redeemButton.innerHTML = `<span class="loading loading-spinner loading-sm"></span>`; }
       try {
-        const res = await fetch(CONFIG.GAS_URL, {
-          method: 'POST',
-          body: JSON.stringify({ action: "redeemStampReward", lineId: userState.lineId })
-        });
+        const res = await fetch(CONFIG.GAS_URL, { method: 'POST', body: JSON.stringify({ action: "redeemStampReward", lineId: userState.lineId }) });
         const result = await res.json();
-
         if (result.success) {
           showAlert('แลกสำเร็จ!', 'กาแฟฟรี 1 แก้วถูกเพิ่มไปยัง "คลัง" ของคุณแล้ว ไปที่เมนูคลังเพื่อรับของได้เลย!', async () => {
             await fetchAndUpdateUserState();
-            router(); // ใช้ router() เพื่อ re-render หน้า dashboard ทั้งหมด
+            router();
           });
-        } else {
-          throw new Error(result.error || 'การแลกของรางวัลล้มเหลว');
-        }
+        } else { throw new Error(result.error || 'การแลกของรางวัลล้มเหลว'); }
       } catch (e) {
         console.error("Redeem free coffee failed:", e);
         showAlert('เกิดข้อผิดพลาด', 'ไม่สามารถแลกของรางวัลได้ กรุณาลองใหม่อีกครั้ง');
-        if (redeemButton) {
-          redeemButton.disabled = false;
-          renderStampCard(); 
-        }
+        if (redeemButton) { redeemButton.disabled = false; renderStampCard(); }
       }
     }
     
@@ -618,7 +592,7 @@
 
     // --- VIEW INITIALIZATION FUNCTIONS ---
     async function initDashboard() {
-      renderStampCard(); // <-- [เพิ่ม] เรียกใช้ฟังก์ชันวาดบัตรสะสม
+      renderStampCard();
       const historyListEl = document.getElementById('historyList'), checkinBox = document.getElementById('checkinBox'), todayDateEl = document.getElementById('todayDate'), checkinBtn = document.getElementById('checkinBtn');
       if (dataCache.history && !userState.pointsChanged) renderHistoryList(dataCache.history);
       else if (historyListEl) historyListEl.innerHTML = generateListSkeleton(5);
@@ -1108,5 +1082,4 @@
     initializeApp();
   </script>
 </body>
-
 </html>
