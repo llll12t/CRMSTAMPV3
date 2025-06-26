@@ -134,28 +134,75 @@
       </div>
   </template>
 
+  <!-- [แก้ไข] TEMPLATE view-add-points ทั้งหมด -->
   <template id="view-add-points">
     <div class="card bg-base-100 shadow-lg max-w-2xl mx-auto rounded-2xl border border-gray-200">
         <div class="card-body">
             <form id="addPointsForm" onsubmit="event.preventDefault()" class="space-y-4">
-                <div class="form-control"><label class="label"><span class="label-text font-semibold text-lg">1. ระบุลูกค้า</span></label><input type="text" id="addPointsIdentifier" placeholder="กรอก Line ID, เบอร์โทร หรือสแกน QR ลูกค้า" class="input input-bordered w-full input-lg rounded-lg" required /></div>
-                <div class="form-control mt-6"><label class="label"><span class="label-text font-semibold text-lg">2. เลือกวิธีให้แต้ม</span></label><div role="tablist" class="tabs tabs-boxed rounded-lg"><a role="tab" class="tab tab-active" data-mode="product">จากรายการสินค้า</a><a role="tab" class="tab" data-mode="manual">กรอกแต้มเอง</a></div></div>
+                
+                <!-- Section 1: Identify Customer -->
+                <div class="form-control">
+                    <label class="label"><span class="label-text font-semibold text-lg">1. ระบุลูกค้า</span></label>
+                    <input type="text" id="addPointsIdentifier" placeholder="กรอก Line ID, เบอร์โทร หรือสแกน QR ลูกค้า" class="input input-bordered w-full input-lg rounded-lg" required />
+                </div>
+  
+                <!-- Section 2: Choose Point Mode -->
+                <div class="form-control mt-6">
+                    <label class="label"><span class="label-text font-semibold text-lg">2. เลือกวิธีให้แต้ม</span></label>
+                    <div role="tablist" class="tabs tabs-boxed rounded-lg">
+                        <a role="tab" class="tab tab-active" data-mode="product">จากรายการสินค้า</a>
+                        <a role="tab" class="tab" data-mode="manual">กรอกแต้มเอง</a>
+                    </div>
+                </div>
+  
+                <!-- Product Mode Section -->
                 <div id="productModeSection" class="space-y-4">
                     <div class="divider">รายการสินค้าในบิล</div>
-                    <div id="billItemsContainer" class="space-y-2 max-h-60 overflow-y-auto pr-2"><p class="text-center text-gray-400">ยังไม่มีรายการ</p></div>
+                    <div id="billItemsContainer" class="space-y-2 max-h-60 overflow-y-auto pr-2">
+                        <p class="text-center text-gray-400">ยังไม่มีรายการ</p>
+                    </div>
                     <div class="divider"></div>
                     <div class="flex items-end gap-2 p-2 bg-base-200 rounded-lg">
-                        <div class="flex-grow"><label class="label-text">เลือกสินค้า</label><select id="productList" class="select select-bordered w-full rounded-lg"><option disabled selected>กำลังโหลด...</option></select></div>
-                        <div><label class="label-text">จำนวน</label><input type="number" id="productQuantity" value="1" min="1" class="input input-bordered w-20 rounded-lg" /></div>
+                        <div class="flex-grow">
+                            <label class="label-text">เลือกสินค้า</label>
+                            <select id="productList" class="select select-bordered w-full rounded-lg">
+                                <option disabled selected>กำลังโหลด...</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="label-text">จำนวน</label>
+                            <input type="number" id="productQuantity" value="1" min="1" class="input input-bordered w-20 rounded-lg" />
+                        </div>
                         <button type="button" id="addItemToBillBtn" class="btn btn-secondary rounded-lg">เพิ่ม</button>
                     </div>
                     <div class="text-right text-xl font-bold">แต้มที่จะได้รับรวม: <span id="totalPointsDisplay" class="text-primary">0</span> แต้ม</div>
                 </div>
+  
+                <!-- Manual Mode Section -->
                 <div id="manualModeSection" class="space-y-4 hidden">
-                    <div class="form-control"><label class="label"><span class="label-text">จำนวนแต้ม</span></label><input type="number" id="addPointsAmount" placeholder="เช่น 50" class="input input-bordered w-full rounded-lg" min="1" /></div>
-                    <div class="form-control"><label class="label"><span class="label-text">เหตุผล</span></label><input type="text" id="addPointsReason" placeholder="เช่น ของขวัญพิเศษ" class="input input-bordered w-full rounded-lg" /></div>
+                    <div class="form-control">
+                        <label class="label"><span class="label-text">จำนวนแต้ม</span></label>
+                        <input type="number" id="addPointsAmount" placeholder="เช่น 50" class="input input-bordered w-full rounded-lg" min="1" />
+                    </div>
+                    <div class="form-control">
+                        <label class="label"><span class="label-text">เหตุผล</span></label>
+                        <input type="text" id="addPointsReason" placeholder="เช่น ของขวัญพิเศษ" class="input input-bordered w-full rounded-lg" />
+                    </div>
                 </div>
-                <div class="mt-8"><button type="submit" id="addPointsSubmitBtn" class="btn btn-primary w-full btn-lg rounded-lg">ยืนยันและให้แต้ม</button></div>
+  
+                <!-- Section 3: Add Coffee Stamp Option -->
+                <div class="form-control mt-6 border-t pt-4">
+                    <label class="cursor-pointer label justify-start gap-4">
+                      <input type="checkbox" id="addCoffeeStamp" class="checkbox checkbox-primary" />
+                      <span class="label-text font-semibold text-lg">ให้แสตมป์กาแฟ 1 ดวง</span> 
+                    </label>
+                    <p class="text-xs text-gray-500 mt-1 ml-10">ติ๊กช่องนี้เมื่อรายการที่ให้แต้มมี "กาแฟ" หรือเครื่องดื่มที่เข้าร่วมรายการสะสมแสตมป์</p>
+                </div>
+  
+                <!-- Section 4: Submit Button -->
+                <div class="mt-8">
+                    <button type="submit" id="addPointsSubmitBtn" class="btn btn-primary w-full btn-lg rounded-lg">ยืนยันและให้แต้ม</button>
+                </div>
             </form>
         </div>
     </div>
@@ -305,13 +352,11 @@
         const hash = window.location.hash || '#dashboard';
         const route = routes[hash] || routes[''];
 
-        // [NEW] Show loading feedback immediately
         pageTitle.textContent = route.title || "Loading...";
         appContainer.classList.add('opacity-50');
         appContainer.innerHTML = `<div class="page-loader"><div class="loading-spinner"></div><p>กำลังเปลี่ยนไปที่เมนู ${route.title}...</p></div>`;
         setActiveNavLink(hash);
 
-        // Fetch level config in the background
         fetchData('getLevelConfig').then(config => {
             if (config) levelConfig = { VIP_points: parseInt(config.VIP_points, 10), SUPER_points: parseInt(config.SUPER_points, 10) };
         }).catch(e => console.warn("Using default level config."));
@@ -351,8 +396,6 @@
     // ==========================================================
     // ===                 PAGE INITIALIZERS                  ===
     // ==========================================================
-    // All init functions are largely the same, only minor class changes were made in templates.
-    // Pasting the full, correct JS for all inits below.
 
     async function initDashboard() {
         const [sTotalUsers, sNewUsers, sTotalItems, sRedeemed, sTotalEvents, sTotalCodes] = ['statTotalUsers', 'statNewUsersToday', 'statTotalItems', 'statRedeemedItems', 'statTotalEvents', 'statTotalCodes'].map(id => document.getElementById(id));
@@ -399,7 +442,8 @@
         }
         async function deleteUser(lineId) { if (await showConfirm('Confirm', `ต้องการลบผู้ใช้ ${lineId}?`)) { try { await postData('deleteUser', { lineId }); showAlert('Success', 'User deleted', () => loadUsers()); } catch (e) { /* handled */ } } }
     }
-
+    
+    // [แก้ไข] JS ทั้งหมดสำหรับหน้า add-points
     async function initAddPoints() {
         const form = document.getElementById('addPointsForm'), submitBtn = document.getElementById('addPointsSubmitBtn'), productModeSection = document.getElementById('productModeSection'), manualModeSection = document.getElementById('manualModeSection'), productListSelect = document.getElementById('productList'), quantityInput = document.getElementById('productQuantity'), addItemBtn = document.getElementById('addItemToBillBtn'), billContainer = document.getElementById('billItemsContainer'), totalPointsDisplay = document.getElementById('totalPointsDisplay'), modeTabs = document.querySelectorAll('.tabs .tab');
         let allProducts = [], billItems = [], currentMode = 'product';
@@ -450,8 +494,15 @@
         form.onsubmit = async (e) => {
             e.preventDefault();
             const identifier = document.getElementById('addPointsIdentifier').value.trim();
+            const giveStamp = document.getElementById('addCoffeeStamp').checked; 
+
             if (!identifier) return showAlert('ข้อมูลไม่ครบ', 'กรุณาระบุลูกค้า');
-            let payload = { identifier }, confirmMessage = '', totalPoints = 0;
+            
+            let payload = { 
+                identifier,
+                giveStamp: giveStamp
+            };
+            let confirmMessage = '', totalPoints = 0;
 
             if (currentMode === 'product') {
                 if (billItems.length === 0) return showAlert('ข้อมูลไม่ครบ', 'กรุณาเพิ่มสินค้าลงในบิล');
@@ -466,6 +517,10 @@
                 payload.points = parseInt(points, 10); payload.reason = reason;
                 totalPoints = payload.points;
                 confirmMessage = `ยืนยันให้ ${totalPoints} แต้ม\nเหตุผล: ${payload.reason}\n\nสำหรับผู้ใช้: "${identifier}"?`;
+            }
+
+            if(giveStamp) {
+                confirmMessage += "\n\nและให้แสตมป์กาแฟ 1 ดวง";
             }
 
             if (await showConfirm('ยืนยันการให้แต้ม', confirmMessage)) {
