@@ -10,6 +10,9 @@
   <!-- Load config before main script (If you have one) -->
   <script src="config-admin.js"></script>
   
+  <!-- Tailwind CSS CDN (without DaisyUI) - MUST BE LOADED FIRST -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
   <!-- Tailwind CSS Configuration for CDN -->
   <script>
     tailwind.config = {
@@ -20,14 +23,14 @@
             'thm-primary': '#866147', // Primary action/accent color
             'thm-secondary': '#A67F68', // A lighter shade of primary for secondary actions
             'thm-accent': '#C5A894',   // A light accent color
+            // You can add more specific shades if needed, e.g.,
+            // 'thm-primary-dark': '#6c4e38',
+            // 'thm-secondary-dark': '#85634d',
           },
         },
       },
     };
   </script>
-  
-  <!-- Tailwind CSS CDN (without DaisyUI) -->
-  <script src="https://cdn.tailwindcss.com"></script>
   
   <!-- External Libraries -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -35,7 +38,6 @@
   <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 
   <style>
-    /* Removed DaisyUI specific body background from here, using Tailwind class instead */
     body { font-family: 'Inter', 'Kanit', sans-serif; }
     
     #qr-shaded-region{ border-width:0 !important ; }
@@ -45,7 +47,7 @@
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     .loading-spinner {
       border: 4px solid rgba(0, 0, 0, 0.1);
-      border-left-color: #866147; /* Use thm-primary color */
+      border-left-color: var(--thm-primary); /* Use CSS variable for theme color */
       border-radius: 50%;
       width: 40px;
       height: 40px;
@@ -67,6 +69,7 @@
     .btn {
       @apply inline-flex items-center justify-center px-4 py-2 border border-transparent text-base font-medium rounded-lg shadow-sm transition-colors duration-200;
     }
+    /* Adjusted hover colors to be darker shades of the primary/secondary/accent */
     .btn-primary { @apply bg-thm-primary text-white hover:bg-[#6c4e38] focus:ring focus:ring-thm-primary focus:ring-opacity-50; }
     .btn-secondary { @apply bg-thm-secondary text-white hover:bg-[#85634d] focus:ring focus:ring-thm-secondary focus:ring-opacity-50; }
     .btn-info { @apply bg-blue-500 text-white hover:bg-blue-600 focus:ring focus:ring-blue-500 focus:ring-opacity-50; }
@@ -80,8 +83,13 @@
 
     /* Inputs, Selects, Textareas */
     .input-bordered, .select-bordered, .textarea-bordered {
-      @apply border border-gray-300 focus:outline-none focus:border-thm-primary focus:ring-1 focus:ring-thm-primary focus:ring-opacity-50;
+      @apply border border-gray-300 p-2 focus:outline-none focus:border-thm-primary focus:ring-1 focus:ring-thm-primary focus:ring-opacity-50;
     }
+    /* Add specific padding for input and select */
+    .input { @apply px-4 py-2; }
+    .select { @apply px-4 py-2; }
+    .textarea { @apply px-4 py-2; }
+
 
     /* Tabs */
     .tabs-boxed {
@@ -100,7 +108,7 @@
     }
     .badge-primary { @apply bg-thm-primary text-white; }
     .badge-secondary { @apply bg-thm-secondary text-white; }
-    .badge-accent { @apply bg-thm-accent text-white; }
+    .badge-accent { @apply bg-thm-accent text-gray-800; } /* Accent might need darker text for contrast */
     .badge-ghost { @apply bg-gray-200 text-gray-700; }
     .badge-success { @apply bg-green-500 text-white; }
     .badge-warning { @apply bg-orange-500 text-white; }
@@ -141,6 +149,15 @@
     .table thead th {
         @apply bg-gray-50 text-gray-700 font-semibold uppercase text-sm;
     }
+
+    /* Custom form-control for spacing labels and inputs */
+    .form-control .label {
+      @apply block text-sm font-medium text-gray-700 mb-1;
+    }
+    .form-control .label-text-alt {
+        @apply block mt-1; /* Adjust spacing for hint text */
+    }
+    
   </style>
 </head>
 
@@ -148,12 +165,12 @@
   <!-- Login Overlay -->
   <div id="login-overlay" class="fixed inset-0 bg-gray-100 flex items-center justify-center z-50">
       <div class="card w-96 bg-white shadow-xl border border-gray-200">
-          <div class="card-body">
-              <h2 class="card-title justify-center text-2xl font-bold">Admin Login</h2>
-              <div id="login-error" class="text-red-500 text-center text-sm hidden"></div>
-              <div class="form-control"><label class="label"><span class="label-text">Username</span></label><input type="text" id="username" placeholder="username" class="input-bordered input w-full rounded-lg" /></div>
-              <div class="form-control"><label class="label"><span class="label-text">Password</span></label><input type="password" id="password" placeholder="password" class="input-bordered input w-full rounded-lg" /></div>
-              <div class="card-actions justify-end mt-4"><button id="loginBtn" class="btn btn-primary w-full rounded-lg">Login</button></div>
+          <div class="card-body p-8">
+              <h2 class="card-title justify-center text-2xl font-bold mb-4">Admin Login</h2>
+              <div id="login-error" class="text-red-500 text-center text-sm hidden mb-4"></div>
+              <div class="mb-4"><label class="label"><span class="label-text">Username</span></label><input type="text" id="username" placeholder="username" class="input-bordered input w-full rounded-lg" /></div>
+              <div class="mb-6"><label class="label"><span class="label-text">Password</span></label><input type="password" id="password" placeholder="password" class="input-bordered input w-full rounded-lg" /></div>
+              <div class="card-actions justify-end"><button id="loginBtn" class="btn btn-primary w-full rounded-lg">Login</button></div>
           </div>
       </div>
   </div>
@@ -295,7 +312,7 @@
                 <!-- Section 3: Add STAMPS Option (Number Input) -->
                 <div class="form-control mt-6 border-t pt-4">
                     <label class="label"><span class="label-text font-semibold text-lg">ให้แสตมป์เพิ่มเติม (ถ้ามี)</span></label>
-                    <input type="number" id="addStampsAmount" class="input-bordered input" placeholder="กรอกจำนวนแสตมป์" value="0" min="0" />
+                    <input type="number" id="addStampsAmount" class="input-bordered input w-full rounded-lg" placeholder="กรอกจำนวนแสตมป์" value="0" min="0" />
                     <label class="label">
                         <span class="label-text-alt text-sm text-gray-500">ใส่ 0 หากไม่ต้องการให้แสตมป์</span>
                     </label>
@@ -312,17 +329,44 @@
 
   <template id="view-items">
       <div class="text-right mb-6"><button id="addItemBtn" class="btn btn-secondary rounded-lg">เพิ่มของรางวัลใหม่</button></div>
-      <div class="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden"><div class="table-responsive"><table class="table w-full"><thead class="bg-gray-50"><tr><th>ID</th><th>ชื่อ</th><th>พ้อยต์</th><th>ประเภท</th><th>รูปภาพ</th><th>จัดการ</th></tr></thead><tbody id="itemTableBody"></tbody></table></div></div>
+      <div class="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
+        <div class="table-responsive">
+          <table class="table w-full">
+            <thead class="bg-gray-50">
+              <tr><th>ID</th><th>ชื่อ</th><th>พ้อยต์</th><th>ประเภท</th><th>รูปภาพ</th><th>จัดการ</th></tr>
+            </thead>
+            <tbody id="itemTableBody"></tbody>
+          </table>
+        </div>
+      </div>
   </template>
 
   <template id="view-products">
       <div class="text-right mb-6"><button id="addProductBtn" class="btn btn-secondary rounded-lg">เพิ่มสินค้าใหม่</button></div>
-      <div class="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden"><div class="table-responsive"><table class="table w-full"><thead class="bg-gray-50"><tr><th>ID</th><th>ชื่อสินค้า</th><th>หมวดหมู่</th><th>ราคา</th><th>แต้ม/หน่วย</th><th>จัดการ</th></tr></thead><tbody id="productTableBody"></tbody></table></div></div>
+      <div class="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
+        <div class="table-responsive">
+          <table class="table w-full">
+            <thead class="bg-gray-50">
+              <tr><th>ID</th><th>ชื่อสินค้า</th><th>หมวดหมู่</th><th>ราคา</th><th>แต้ม/หน่วย</th><th>จัดการ</th></tr>
+            </thead>
+            <tbody id="productTableBody"></tbody>
+          </table>
+        </div>
+      </div>
   </template>
 
   <template id="view-warehouse">
       <div class="flex flex-wrap gap-4 mb-6"><input type="text" id="warehouseSearchInput" placeholder="ค้นหา..." class="input-bordered input flex-grow rounded-lg" /><select id="warehouseStatusFilter" class="select-bordered select w-full md:w-auto rounded-lg"><option value="">-- ทุกสถานะ --</option><option value="pending_claim" selected>รอรับ/จัดส่ง</option><option value="claimed">รับแล้ว</option></select><button id="warehouseSearchBtn" class="btn btn-primary rounded-lg">ค้นหา</button></div>
-      <div class="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden"><div class="table-responsive"><table class="table w-full"><thead class="bg-gray-50"><tr><th>ID</th><th>ของรางวัล</th><th>ผู้ใช้</th><th>ข้อมูลจัดส่ง</th><th>วันที่แลก</th><th>สถานะ</th><th>จัดการ</th></tr></thead><tbody id="warehouseTableBody"></tbody></table></div></div>
+      <div class="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
+        <div class="table-responsive">
+          <table class="table w-full">
+            <thead class="bg-gray-50">
+              <tr><th>ID</th><th>ของรางวัล</th><th>ผู้ใช้</th><th>ข้อมูลจัดส่ง</th><th>วันที่แลก</th><th>สถานะ</th><th>จัดการ</th></tr>
+            </thead>
+            <tbody id="warehouseTableBody"></tbody>
+          </table>
+        </div>
+      </div>
   </template>
   
   <template id="view-scan-claim">
@@ -340,17 +384,44 @@
   
   <template id="view-events">
       <div class="text-right mb-6"><button id="addEventBtn" class="btn btn-secondary rounded-lg">เพิ่มกิจกรรมใหม่</button></div>
-      <div class="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden"><div class="table-responsive"><table class="table w-full"><thead class="bg-gray-50"><tr><th>ID</th><th>ชื่อกิจกรรม</th><th>พ้อยต์</th><th>ระดับที่เข้าร่วมได้</th><th>รูปภาพ</th><th>จัดการ</th></tr></thead><tbody id="eventTableBody"></tbody></table></div></div>
+      <div class="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
+        <div class="table-responsive">
+          <table class="table w-full">
+            <thead class="bg-gray-50">
+              <tr><th>ID</th><th>ชื่อกิจกรรม</th><th>พ้อยต์</th><th>ระดับที่เข้าร่วมได้</th><th>รูปภาพ</th><th>จัดการ</th></tr>
+            </thead>
+            <tbody id="eventTableBody"></tbody>
+          </table>
+        </div>
+      </div>
   </template>
   
   <template id="view-codes">
       <div class="text-right mb-6"><button id="addCodeBtn" class="btn btn-secondary rounded-lg">เพิ่มโค้ดใหม่</button></div>
-      <div class="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden"><div class="table-responsive"><table class="table w-full"><thead class="bg-gray-50"><tr><th>ID (QR Code)</th><th>ชื่อโค้ด</th><th>พ้อยต์</th><th>รายละเอียด</th><th>จัดการ</th></tr></thead><tbody id="codeTableBody"></tbody></table></div></div>
+      <div class="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
+        <div class="table-responsive">
+          <table class="table w-full">
+            <thead class="bg-gray-50">
+              <tr><th>ID (QR Code)</th><th>ชื่อโค้ด</th><th>พ้อยต์</th><th>รายละเอียด</th><th>จัดการ</th></tr>
+            </thead>
+            <tbody id="codeTableBody"></tbody>
+          </table>
+        </div>
+      </div>
   </template>
   
   <template id="view-history">
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6 items-end"><input type="text" id="historySearchLineId" placeholder="ค้นหาด้วย Line ID" class="input-bordered input w-full rounded-lg" /><select id="historyFilterType" class="select-bordered select w-full rounded-lg"><option value="">-- ประเภททั้งหมด --</option><option value="purchase">การซื้อสินค้า</option><option value="admin_add">Admin เพิ่มแต้ม</option><option value="checkin">เช็คอิน</option><option value="event">กิจกรรม</option><option value="code">โค้ด</option><option value="redeem">แลกของ</option><option value="transfer_in">รับโอน</option><option value="transfer_out">โอนออก</option></select><input type="date" id="historyStartDate" class="input-bordered input w-full rounded-lg" placeholder="จากวันที่"><input type="date" id="historyEndDate" class="input-bordered input w-full rounded-lg" placeholder="ถึงวันที่"><div class="flex gap-2"><button id="historyFilterBtn" class="btn btn-primary flex-grow rounded-lg">กรอง</button><button id="historyResetBtn" class="btn btn-ghost flex-grow rounded-lg">รีเซ็ต</button></div></div>
-      <div class="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden"><div class="table-responsive"><table class="table w-full"><thead class="bg-gray-50"><tr><th>Line ID</th><th>ประเภท</th><th>รายละเอียด</th><th>จำนวน</th><th>วันที่</th><th>ID อ้างอิง</th></tr></thead><tbody id="historyTableBody"></tbody></table></div></div>
+      <div class="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
+        <div class="table-responsive">
+          <table class="table w-full">
+            <thead class="bg-gray-50">
+              <tr><th>Line ID</th><th>ประเภท</th><th>รายละเอียด</th><th>จำนวน</th><th>วันที่</th><th>ID อ้างอิง</th></tr>
+            </thead>
+            <tbody id="historyTableBody"></tbody>
+          </table>
+        </div>
+      </div>
   </template>
   
   <template id="view-settings">
@@ -509,7 +580,8 @@
 
     async function initDashboard() {
         const [sTotalUsers, sNewUsers, sTotalItems, sRedeemed, sTotalEvents, sTotalCodes] = ['statTotalUsers', 'statNewUsersToday', 'statTotalItems', 'statRedeemedItems', 'statTotalEvents', 'statTotalCodes'].map(id => document.getElementById(id));
-        const userLevelChartCtx = document.getElementById('userLevelChart').getContext('2d'); const pointStatsChartCtx = document.getElementById('pointStatsChart').getContext('2d');
+        const userLevelChartCtx = document.getElementById('userLevelChart').getContext('2d'); 
+        const pointStatsChartCtx = document.getElementById('pointStatsChart').getContext('2d');
         try { 
             const data = await fetchData('getDashboardData'); 
             sTotalUsers.textContent = data.users.length; 
@@ -523,7 +595,7 @@
             window.userLevelChartInstance = new Chart(userLevelChartCtx, { type: 'bar', data: { labels: ['MEMBER', 'VIP', 'SUPER'], datasets: [{ label: 'จำนวน', data: [levelCounts.MEMBER, levelCounts.VIP, levelCounts.SUPER], backgroundColor: ['#a7d3f2', '#61a6d9', '#1e75b9'] }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } } }); 
             const { earned, spent } = data.allHistory.reduce((acc, h) => { if (h.amount > 0) acc.earned += h.amount; else acc.spent += Math.abs(h.amount); return acc; }, { earned: 0, spent: 0 }); 
             if (window.pointStatsChartInstance) window.pointStatsChartInstance.destroy(); 
-            window.pointStatsChartInstance = new Chart(pointStatsChartCtx, { type: 'doughnut', data: { labels: ['ได้รับ', 'ใช้ไป'], datasets: [{ data: [earned, spent], backgroundColor: ['#36d399', '#f87272'] }] }, options: { responsive: true, maintainAspectRatio: false } }); 
+            window.pointStatsChartInstance = new Chart(pointStatsChartCtx, { type: 'doughnut', data: { labels: ['ได้รับ', 'ใช้ไป'], datasets: [{ data: [earned, spent], backgroundColor: ['#866147', '#A67F68'] }] }, options: { responsive: true, maintainAspectRatio: false } }); /* Use thm-primary and thm-secondary */
         } catch (e) { /* Error handled */ }
     }
 
