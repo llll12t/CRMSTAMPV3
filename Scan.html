@@ -12,7 +12,7 @@
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
 
-  <!-- Tailwind CSS Configuration for CDN (NEW THEME) -->
+  <!-- Tailwind CSS Configuration for CDN -->
   <script>
     tailwind.config = {
       theme: {
@@ -50,7 +50,6 @@
       height: 24px;
       animation: spin 1s linear infinite; 
     }
-    /* Updated Modal styles for new theme */
     .modal-overlay {
         position: fixed; inset: 0; z-index: 50;
         display: flex; align-items: center; justify-content: center;
@@ -90,7 +89,7 @@
       </main>
   </div>
 
-  <!-- MODALS (Styled with new theme) -->
+  <!-- MODALS -->
   <div id="customAlertDialog" class="modal-overlay">
     <div class="modal-box">
         <h3 id="customAlertTitle" class="font-bold text-lg mb-3 text-center text-gray-800"></h3>
@@ -121,7 +120,7 @@
   <!-- Main Template -->
   <template id="view-cashier-page">
     <div class="w-full max-w-4xl mx-auto">
-      <!-- Custom Tabs (Styled with new theme) -->
+      <!-- Custom Tabs -->
       <div class="flex border-b border-gray-200 mb-4" id="main-tabs-container">
         <button data-tab="scan" class="tab-button flex-1 py-3 px-1 text-center font-semibold text-gray-500 border-b-2 border-transparent hover:border-gray-300 hover:text-gray-700">สแกนรับของ</button>
         <button data-tab="pos" class="tab-button flex-1 py-3 px-1 text-center font-semibold text-gray-500 border-b-2 border-transparent hover:border-gray-300 hover:text-gray-700">ให้แต้ม/แสตมป์</button>
@@ -179,11 +178,19 @@
                     <div><label class="block text-xs text-gray-600 mb-1">เหตุผล</label><input type="text" id="addPointsReason" placeholder="เช่น ของขวัญพิเศษ" class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg" /></div>
                 </div>
                 
-                <!-- NEW STAMPS SECTION -->
+                <!-- UPDATED STAMPS SECTION -->
                 <div class="border-t pt-4">
                     <label class="block text-sm font-semibold text-gray-700 mb-1">3. ให้แสตมป์เพิ่มเติม (ถ้ามี)</label>
-                    <input type="number" id="addStampsAmount" class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-thm-primary" placeholder="กรอกจำนวนแสตมป์" value="0" min="0" />
-                    <p class="text-xs text-gray-500 mt-1">ใส่ 0 หากไม่ต้องการให้แสตมป์</p>
+                    <div class="flex items-center gap-2 mt-2">
+                      <!-- Quick select buttons -->
+                      <button type="button" class="stamp-btn flex-shrink-0 w-10 h-10 rounded-lg font-bold bg-gray-200 text-gray-700 hover:bg-gray-300" data-stamp="1">1</button>
+                      <button type="button" class="stamp-btn flex-shrink-0 w-10 h-10 rounded-lg font-bold bg-gray-200 text-gray-700 hover:bg-gray-300" data-stamp="2">2</button>
+                      <button type="button" class="stamp-btn flex-shrink-0 w-10 h-10 rounded-lg font-bold bg-gray-200 text-gray-700 hover:bg-gray-300" data-stamp="3">3</button>
+                      <button type="button" class="stamp-btn flex-shrink-0 w-10 h-10 rounded-lg font-bold bg-gray-200 text-gray-700 hover:bg-gray-300" data-stamp="4">4</button>
+                      <button type="button" class="stamp-btn flex-shrink-0 w-10 h-10 rounded-lg font-bold bg-gray-200 text-gray-700 hover:bg-gray-300" data-stamp="5">5</button>
+                      <!-- Manual input -->
+                      <input type="number" id="addStampsAmount" class="flex-grow w-full px-3 py-2 text-center font-bold bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-thm-primary" value="0" min="0" />
+                    </div>
                 </div>
 
                 <div class="pt-2"><button type="submit" id="addPointsSubmitBtn" class="w-full bg-thm-primary text-white text-lg font-bold py-3 px-4 rounded-lg hover:bg-thm-primary-dark">ยืนยันรายการ</button></div>
@@ -247,8 +254,7 @@
         const tabPanels = document.querySelectorAll('.tab-panel');
         
         function switchTab(tabId) {
-            stopClaimScanner();
-            stopCustomerScanner();
+            stopClaimScanner(); stopCustomerScanner();
             tabButtons.forEach(btn => {
                 const isSelected = btn.dataset.tab === tabId;
                 btn.classList.toggle('text-thm-primary', isSelected);
@@ -275,41 +281,39 @@
         const stopCustomerScanner = async () => { if (customerScanner && customerScanner.isScanning) { try { await customerScanner.stop(); } catch (err) {} } scanCustomerModal.classList.remove('active'); };
         scanCustomerBtn.onclick = startCustomerScanner; closeScanCustomerBtn.onclick = stopCustomerScanner;
 
-        // --- Add Points & Stamps (POS) Logic (UPDATED) ---
+        // --- Add Points & Stamps (POS) Logic ---
         const addPointsForm = document.getElementById('addPointsForm'), addPointsSubmitBtn = document.getElementById('addPointsSubmitBtn'), productModeSection = document.getElementById('productModeSection'), manualModeSection = document.getElementById('manualModeSection'), productListSelect = document.getElementById('productList'), quantityInput = document.getElementById('productQuantity'), addItemBtn = document.getElementById('addItemToBillBtn'), billContainer = document.getElementById('billItemsContainer'), totalPointsDisplay = document.getElementById('totalPointsDisplay'), posModeContainer = document.getElementById('pos-mode-container');
+        const stampButtons = document.querySelectorAll('.stamp-btn'), addStampsAmountInput = document.getElementById('addStampsAmount');
         let allProducts = [], billItems = [], currentPosMode = 'product';
+        
+        // Product Logic
         try { allProducts = await fetchData('getProducts'); updateProductDropdown(); } catch (e) { productListSelect.innerHTML = `<option disabled selected>โหลดสินค้าล้มเหลว</option>`; }
         function updateProductDropdown() { const productIdsInBill = billItems.map(item => item.id); const availableProducts = allProducts.filter(p => !productIdsInBill.includes(p.id)); productListSelect.innerHTML = ''; if (availableProducts.length > 0) { availableProducts.forEach(p => { const option = document.createElement('option'); option.value = p.id; option.textContent = `${p.name} (${p.points} แต้ม)`; productListSelect.appendChild(option); }); } else { productListSelect.innerHTML = '<option disabled selected>เพิ่มสินค้าครบแล้ว</option>'; } }
         function renderBill() { billContainer.innerHTML = ''; let totalPoints = 0; if (billItems.length === 0) { billContainer.innerHTML = '<p class="text-center text-gray-400">ยังไม่มีรายการ</p>'; totalPointsDisplay.textContent = '0'; return; } billItems.forEach(item => { const itemPoints = item.points * item.quantity; totalPoints += itemPoints; const itemDiv = document.createElement('div'); itemDiv.className = 'flex items-center justify-between p-2 bg-gray-100 rounded-md'; itemDiv.innerHTML = `<div><span class="font-semibold text-gray-800">${item.name}</span> <span class="text-sm text-gray-500">x ${item.quantity}</span></div><div><span class="font-bold text-thm-primary">${itemPoints} แต้ม</span><button type="button" class="ml-2 p-1 remove-item-btn text-red-500 hover:bg-red-100 rounded-full" data-id="${item.id}"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button></div>`; billContainer.appendChild(itemDiv); }); totalPointsDisplay.textContent = totalPoints.toLocaleString(); billContainer.querySelectorAll('.remove-item-btn').forEach(btn => { btn.onclick = (e) => { billItems = billItems.filter(item => item.id !== e.currentTarget.dataset.id); renderBill(); updateProductDropdown(); }; }); }
         posModeContainer.addEventListener('click', (e) => { if(e.target.matches('.pos-mode-button')) { currentPosMode = e.target.dataset.mode; posModeContainer.querySelectorAll('.pos-mode-button').forEach(b => {const isSelected = b.dataset.mode === currentPosMode; b.classList.toggle('bg-thm-primary', isSelected); b.classList.toggle('text-white', isSelected);}); productModeSection.classList.toggle('hidden', currentPosMode !== 'product'); manualModeSection.classList.toggle('hidden', currentPosMode !== 'manual'); }});
         addItemBtn.onclick = () => { const selectedId = productListSelect.value; if (!selectedId) return; const product = allProducts.find(p => p.id === selectedId); const quantity = parseInt(quantityInput.value, 10); if (product && quantity > 0) { billItems.push({ ...product, quantity }); renderBill(); updateProductDropdown(); quantityInput.value = 1; } };
         
+        // Stamp Logic
+        function updateStampButtonUI(selectedValue) { stampButtons.forEach(btn => { const isSelected = btn.dataset.stamp == selectedValue; btn.classList.toggle('bg-thm-primary', isSelected); btn.classList.toggle('text-white', isSelected); btn.classList.toggle('bg-gray-200', !isSelected); btn.classList.toggle('text-gray-700', !isSelected); }); }
+        stampButtons.forEach(button => { button.addEventListener('click', () => { const stampValue = button.dataset.stamp; addStampsAmountInput.value = stampValue; updateStampButtonUI(stampValue); }); });
+        addStampsAmountInput.addEventListener('input', () => { updateStampButtonUI(addStampsAmountInput.value); });
+        
+        // Form Submission Logic
         addPointsForm.onsubmit = async (e) => {
             e.preventDefault();
             const identifier = document.getElementById('addPointsIdentifier').value.trim();
-            const stampsToAdd = parseInt(document.getElementById('addStampsAmount').value, 10) || 0;
+            const stampsToAdd = parseInt(addStampsAmountInput.value, 10) || 0;
             if (!identifier) return showAlert('ข้อมูลไม่ครบ', 'กรุณาระบุลูกค้า');
             
-            let payload = { identifier, stampsToAdd };
-            let totalPoints = 0;
-            let confirmParts = [];
+            let payload = { identifier, stampsToAdd }; let totalPoints = 0; let confirmParts = [];
 
             if (currentPosMode === 'product') {
                 totalPoints = billItems.reduce((sum, item) => sum + (item.points * item.quantity), 0);
-                if (billItems.length > 0) {
-                     payload.itemsPurchased = billItems.map(item => ({ productId: item.id, quantity: item.quantity }));
-                     confirmParts.push(`ให้ ${totalPoints} แต้ม จากรายการสินค้า`);
-                }
+                if (billItems.length > 0) { payload.itemsPurchased = billItems.map(item => ({ productId: item.id, quantity: item.quantity })); confirmParts.push(`ให้ ${totalPoints} แต้ม จากสินค้า`); }
             } else { // manual mode
-                const points = document.getElementById('addPointsAmount').value;
-                const reason = document.getElementById('addPointsReason').value.trim();
+                const points = document.getElementById('addPointsAmount').value; const reason = document.getElementById('addPointsReason').value.trim();
                 totalPoints = parseInt(points, 10) || 0;
-                if (totalPoints > 0) {
-                    if (!reason) return showAlert('ข้อมูลไม่ครบ', 'กรุณากรอกเหตุผลสำหรับแต้มที่กรอกเอง');
-                    payload.points = totalPoints;
-                    payload.reason = reason;
-                    confirmParts.push(`ให้ ${totalPoints} แต้ม (เหตุผล: ${reason})`);
-                }
+                if (totalPoints > 0) { if (!reason) return showAlert('ข้อมูลไม่ครบ', 'กรุณากรอกเหตุผลสำหรับแต้มที่กรอกเอง'); payload.points = totalPoints; payload.reason = reason; confirmParts.push(`ให้ ${totalPoints} แต้ม (เหตุผล: ${reason})`); }
             }
             if (stampsToAdd > 0) { confirmParts.push(`ให้ ${stampsToAdd} แสตมป์`); }
             if (confirmParts.length === 0) { return showAlert('ไม่มีรายการ', 'กรุณาเพิ่มสินค้า, กรอกแต้ม, หรือระบุจำนวนแสตมป์'); }
@@ -321,20 +325,18 @@
                 try {
                     const message = await postData('addPointsToUser', payload);
                     showAlert('สำเร็จ', message || 'ทำรายการเรียบร้อยแล้ว');
-                    addPointsForm.reset();
-                    document.getElementById('addStampsAmount').value = 0; // Explicitly reset stamps
+                    addPointsForm.reset(); addStampsAmountInput.value = 0; updateStampButtonUI(0);
                     billItems = []; renderBill(); updateProductDropdown();
-                } catch(e) { /* Error handled by postData */ } 
+                } catch(e) { /* Error handled */ } 
                 finally { addPointsSubmitBtn.classList.remove('opacity-50', 'cursor-not-allowed'); addPointsSubmitBtn.disabled = false; }
             }
         };
-        renderBill();
-        posModeContainer.querySelector('[data-mode="product"]').click(); 
+        renderBill(); posModeContainer.querySelector('[data-mode="product"]').click(); 
         
         // --- Recent History Logic ---
         const historyTableBody = document.getElementById('historyTableBody'), refreshHistoryBtn = document.getElementById('refreshHistoryBtn');
         function parseGASDate(dateString) { const parts = dateString.split(/[\s/:]/); if (parts.length < 6) return new Date(dateString); return new Date(parts[2], parts[1] - 1, parts[0], parts[3], parts[4], parts[5]); }
-        const transactionTypeMap = { 'purchase': { text: 'ซื้อสินค้า', style: 'bg-blue-100 text-blue-800' }, 'admin_add': { text: 'Admin เพิ่ม', style: 'bg-indigo-100 text-indigo-800' }, 'redeem': { text: 'แลกของ', style: 'bg-red-100 text-red-800' }, 'event': { text: 'กิจกรรม', style: 'bg-purple-100 text-purple-800' }, 'code': { text: 'ใช้โค้ด', style: 'bg-yellow-100 text-yellow-800' }, 'checkin': { text: 'เช็คอิน', style: 'bg-green-100 text-green-800' }, 'default': { text: 'อื่นๆ', style: 'bg-gray-100 text-gray-800' } };
+        const transactionTypeMap = { 'purchase': { text: 'ซื้อสินค้า', style: 'bg-blue-100 text-blue-800' }, 'admin_add': { text: 'Admin เพิ่ม', style: 'bg-indigo-100 text-indigo-800' }, 'redeem': { text: 'แลกของ', style: 'bg-red-100 text-red-800' }, 'event': { text: 'กิจกรรม', style: 'bg-purple-100 text-purple-800' }, 'code': { text: 'ใช้โค้ด', style: 'bg-yellow-100 text-yellow-800' }, 'checkin': { text: 'เช็คอิน', style: 'bg-green-100 text-green-800' }, 'stamp': { text: 'รับแสตมป์', style: 'bg-pink-100 text-pink-800' }, 'default': { text: 'อื่นๆ', style: 'bg-gray-100 text-gray-800' } };
         async function loadHistory() { historyTableBody.innerHTML = `<tr><td colspan="4" class="py-12 text-center"><div class="loading-spinner mx-auto" style="width: 40px; height: 40px;"></div></td></tr>`; try { const history = await fetchData('getAllHistory', { limit: 20 }); if (!history.length) { historyTableBody.innerHTML = `<tr><td colspan="4" class="text-center p-4 text-gray-500">ไม่พบประวัติ</td></tr>`; return; } historyTableBody.innerHTML = history.map(h => { const dateObj = parseGASDate(h.date); const formattedDate = !isNaN(dateObj) ? dateObj.toLocaleString('th-TH', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit'}) : 'Invalid Date'; const typeInfo = transactionTypeMap[h.type] || transactionTypeMap['default']; return `<tr class="border-b border-gray-200"><td class="px-4 py-3 text-gray-500">${formattedDate}</td><td class="px-4 py-3"><span class="px-2 py-1 text-xs font-medium rounded-full ${typeInfo.style}">${typeInfo.text}</span></td><td class="px-4 py-3 max-w-xs truncate">${h.detail}</td><td class="px-4 py-3 font-bold text-right ${h.amount < 0 ? 'text-red-600' : 'text-green-600'}">${h.amount > 0 ? '+' : ''}${h.amount}</td></tr>`; }).join(''); } catch (e) { historyTableBody.innerHTML = `<tr><td colspan="4" class="text-center p-4 text-red-500">Load failed</td></tr>`; } }
         refreshHistoryBtn.onclick = loadHistory;
 
