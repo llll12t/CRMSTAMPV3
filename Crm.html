@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="th">
+
 <head>
   <meta charset="UTF-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
@@ -329,7 +330,7 @@
   </dialog>
 
   <script>
-  // --- GLOBAL STATE & CACHE ---
+    // --- GLOBAL STATE & CACHE ---
     let liffInitialized = false;
     const userState = { profile: null, lineId: "", points: 0, totalPoints: 0, coffeeStamps: 0, pointsChanged: false, level: "Member", customTag: "" };
     const dataCache = { events: null, redeemItems: null, eventDetails: {}, userProfileFull: null, history: null, levelSettings: null };
@@ -340,11 +341,11 @@
     const confirmDialog = document.getElementById('customConfirmDialog'), confT = document.getElementById('customConfirmTitle'), confM = document.getElementById('customConfirmMessage'), okBtn = document.getElementById('customConfirmConfirmButton'), noBtn = document.getElementById('customConfirmCancelButton');
     const pageTitleEl = document.getElementById('pageTitle'), pointValEl = document.getElementById('pointVal'), dpEl = document.getElementById('lineDisplayPicture');
     const qrDialog = document.getElementById('qrDialog'),
-    qrDialogTitle = document.getElementById('qrDialogTitle'),
-    qrDialogItemName = document.getElementById('qrDialogItemName'),
-    qrcodeContainer = document.getElementById('qrcode'),
-    qrConfirmBtn = document.getElementById('qrDialogConfirmBtn'),
-    qrCloseBtn = document.getElementById('qrDialogCloseBtn');
+      qrDialogTitle = document.getElementById('qrDialogTitle'),
+      qrDialogItemName = document.getElementById('qrDialogItemName'),
+      qrcodeContainer = document.getElementById('qrcode'),
+      qrConfirmBtn = document.getElementById('qrDialogConfirmBtn'),
+      qrCloseBtn = document.getElementById('qrDialogCloseBtn');
 
     // --- STYLES ---
     const LEVEL_STYLES = { 'Member': { text: 'Member', class: 'badge-info badge-outline' }, 'VIP': { text: 'VIP', class: 'badge-primary badge-outline' }, 'Super': { text: 'Super', class: 'badge-success badge-outline' } };
@@ -374,7 +375,7 @@
       if (totalAccumulatedPoints >= superPoints) {
         level = 'Super';
         currentLevelMin = superPoints;
-        nextLevelMin = totalAccumulatedPoints; 
+        nextLevelMin = totalAccumulatedPoints;
         nextLevelName = '';
       } else if (totalAccumulatedPoints >= vipPoints) {
         level = 'VIP';
@@ -448,12 +449,12 @@
         ]);
         const userData = await userRes.json();
         if (!userData || !userData.isRegistered) { window.location.href = 'Register.html'; return false; }
-        
+
         // <<< เพิ่ม LOG จุดที่ 2 (สำคัญที่สุด): ตรวจสอบข้อมูลดิบที่ได้จาก Server ตอนเริ่มแอป
         console.log('[DEBUG] RAW User Data from Server on Init:', userData);
-        
+
         dataCache.history = await histRes.json();
-        dataCache.events = await eventsRes.json(); 
+        dataCache.events = await eventsRes.json();
         dataCache.redeemItems = await redeemRes.json();
         const settingsData = await settingsRes.json();
         if (settingsData && !settingsData.error) { dataCache.levelSettings = { VIP_points: parseInt(settingsData.VIP_points || 0), SUPER_points: parseInt(settingsData.SUPER_points || 0) }; }
@@ -471,7 +472,7 @@
       } catch (error) { console.error("Failed to fetch initial data:", error); pointValEl.textContent = 'N/A'; showAlert("ข้อผิดพลาด", "ไม่สามารถโหลดข้อมูลผู้ใช้ได้ กรุณาลองใหม่"); return false; }
       return true;
     }
-    
+
     // ... (ส่วน router และอื่นๆ ไม่ต้องแก้ไข) ...
     const routes = {
       '#dashboard': { title: 'หน้าหลัก', tpl: 'view-dashboard', init: initDashboard },
@@ -525,7 +526,7 @@
         } catch (e) { console.error("Error fetching history:", e); dataCache.history = []; userState.pointsChanged = false; }
       } return dataCache.history;
     }
-    
+
     // --- STAMP CARD FUNCTIONS ---
     async function handleRedeemFreeCoffee() {
       if (!(await showConfirm('แลกกาแฟฟรี', 'ยินดีด้วย! คุณสะสมครบ 10 ดวงแล้ว แลกรับกาแฟฟรี 1 แก้วเลยไหม?'))) {
@@ -548,26 +549,42 @@
         if (redeemButton) { redeemButton.disabled = false; renderStampCard(); }
       }
     }
-    
+
     function renderStampCard() {
       const stampCardEl = document.getElementById('stampCard');
       if (!stampCardEl) return;
-      
+
       // <<< เพิ่ม LOG จุดที่ 3: ตรวจสอบค่าแสตมป์ก่อนที่จะนำไปวาด UI
       console.log(`[DEBUG] Rendering stamp card with userState.coffeeStamps = ${userState.coffeeStamps}`);
 
-      stampCardEl.innerHTML = ''; 
+      stampCardEl.innerHTML = '';
       const stamps = userState.coffeeStamps || 0;
       const totalStamps = 10;
-      
-      const filledIcon = `<svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" viewBox="0 0 24 24"><path fill="currentColor" d="M18.5 3H6c-1.1 0-2 .9-2 2v5.71c0 3.83 2.95 7.18 6.78 7.29c3.96.12 7.22-3.06 7.22-7v-1h.5c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2m-1 2v3h-2V5zM6 5h7v5c0 2.21-1.79 4-4 4s-4-1.79-4-4V5z"/></svg>`;
-      const emptyIcon = `<svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M18.5 3H6a2 2 0 0 0-2 2v5.71c0 3.83 2.95 7.18 6.78 7.29c3.96.12 7.22-3.06 7.22-7v-1h.5a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2m-1 2v3h-2V5M6 5h7v5a4 4 0 1 1-8 0z"/></svg>`;
-      const giftIcon = `<svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" viewBox="0 0 24 24"><path fill="currentColor" d="M19 12h-2V8h-2v4h-2V8h-2v4H9V8H7v4H5v9h14zM5 7h14c0-2.76-2.24-5-5-5h-4c-2.76 0-5 2.24-5 5"/></svg>`;
-      
+
+      const filledIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="#000000" fill="none">
+    <path d="M5 7L6.7602 17.4048C7.06616 19.2134 7.21914 20.1177 7.76007 20.7417C9.21438 22.4194 14.7856 22.4194 16.2399 20.7417C16.7809 20.1177 16.9338 19.2134 17.2398 17.4048L19 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
+    <path d="M5 7L5.74278 5.2876C6.35168 3.88385 6.65613 3.18197 7.29101 2.7856C8.88049 1.79324 14.9452 1.68444 16.709 2.7856C17.3439 3.18197 17.6483 3.88385 18.2572 5.2876L19 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
+    <path d="M4 7H20" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
+    <ellipse cx="12" cy="14.5" rx="2" ry="2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></ellipse>
+</svg>`;
+      const emptyIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="#000000" fill="none">
+    <path d="M5 7L6.7602 17.4048C7.06616 19.2134 7.21914 20.1177 7.76007 20.7417C9.21438 22.4194 14.7856 22.4194 16.2399 20.7417C16.7809 20.1177 16.9338 19.2134 17.2398 17.4048L19 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
+    <path d="M5 7L5.74278 5.2876C6.35168 3.88385 6.65613 3.18197 7.29101 2.7856C8.88049 1.79324 14.9452 1.68444 16.709 2.7856C17.3439 3.18197 17.6483 3.88385 18.2572 5.2876L19 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
+    <path d="M4 7H20" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
+    <ellipse cx="12" cy="14.5" rx="2" ry="2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></ellipse>
+</svg>`;
+      const giftIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="#000000" fill="none">
+    <path d="M4 11V15C4 18.2998 4 19.9497 5.02513 20.9749C6.05025 22 7.70017 22 11 22H13C16.2998 22 17.9497 22 18.9749 20.9749C20 19.9497 20 18.2998 20 15V11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+    <path d="M3 9C3 8.25231 3 7.87846 3.20096 7.6C3.33261 7.41758 3.52197 7.26609 3.75 7.16077C4.09808 7 4.56538 7 5.5 7H18.5C19.4346 7 19.9019 7 20.25 7.16077C20.478 7.26609 20.6674 7.41758 20.799 7.6C21 7.87846 21 8.25231 21 9C21 9.74769 21 10.1215 20.799 10.4C20.6674 10.5824 20.478 10.7339 20.25 10.8392C19.9019 11 19.4346 11 18.5 11H5.5C4.56538 11 4.09808 11 3.75 10.8392C3.52197 10.7339 3.33261 10.5824 3.20096 10.4C3 10.1215 3 9.74769 3 9Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"></path>
+    <path d="M6 3.78571C6 2.79949 6.79949 2 7.78571 2H8.14286C10.2731 2 12 3.7269 12 5.85714V7H9.21429C7.43908 7 6 5.56091 6 3.78571Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"></path>
+    <path d="M18 3.78571C18 2.79949 17.2005 2 16.2143 2H15.8571C13.7269 2 12 3.7269 12 5.85714V7H14.7857C16.5609 7 18 5.56091 18 3.78571Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"></path>
+    <path d="M12 11L12 22" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>`;
+
       for (let i = 1; i <= totalStamps; i++) {
         const isLastStamp = (i === totalStamps);
         const isFilled = (i <= stamps);
-        
+
         let iconHtml;
         let containerClasses = 'aspect-square rounded-xl flex items-center justify-center transition-all';
         let element;
@@ -575,21 +592,21 @@
         if (isLastStamp) {
           iconHtml = giftIcon;
           if (stamps >= totalStamps) {
-             containerClasses += ' bg-red-500 text-white cursor-pointer hover:bg-red-600 shadow-lg animate-pulse';
-             element = document.createElement('button');
-             element.setAttribute('aria-label', 'แลกกาแฟฟรี');
-             element.onclick = handleRedeemFreeCoffee;
+            containerClasses += ' bg-red-500 text-white cursor-pointer hover:bg-red-600 shadow-lg animate-pulse';
+            element = document.createElement('button');
+            element.setAttribute('aria-label', 'แลกกาแฟฟรี');
+            element.onclick = handleRedeemFreeCoffee;
           } else {
-             containerClasses += ' bg-white text-gray-400 border border-dashed border-gray-300';
-             element = document.createElement('div');
+            containerClasses += ' bg-white text-gray-400 border border-dashed border-gray-300';
+            element = document.createElement('div');
           }
         } else {
           if (isFilled) {
             iconHtml = filledIcon;
-            containerClasses += ' bg-stone-800 text-white';
+            containerClasses += ' bg-[#875757] text-white';
           } else {
             iconHtml = emptyIcon;
-            containerClasses += ' bg-white text-stone-800 border border-gray-300';
+            containerClasses += ' bg-white text-[#875757] border border-gray-300';
           }
           element = document.createElement('div');
         }
@@ -655,7 +672,7 @@
           }
           levelTagHTML = `<div class="badge badge-outline badge-sm mt-2">สำหรับ: ${e.allowedLevels}</div>`;
         } else {
-          isUserAllowed = true; 
+          isUserAllowed = true;
         }
 
         const buttonHTML = isUserAllowed
@@ -711,7 +728,7 @@
             isLevelAllowed = true;
           }
         } else {
-          isLevelAllowed = true; 
+          isLevelAllowed = true;
         }
 
         if (hasJoined) {
@@ -735,7 +752,7 @@
                 if (text.includes("สำเร็จ")) {
                   await fetchAndUpdateUserState();
                   joinBtn.textContent = "รับพ้อยต์แล้ว";
-                  joinBtn.disabled = true; 
+                  joinBtn.disabled = true;
                 } else {
                   joinBtn.textContent = "รับพ้อยต์แล้ว";
                   joinBtn.disabled = true;
@@ -969,52 +986,52 @@
     }
 
     async function initWarehouse() {
-    if (warehousePollingInterval) {
+      if (warehousePollingInterval) {
         clearInterval(warehousePollingInterval);
         warehousePollingInterval = null;
         if (qrDialog.open) qrDialog.close();
-    }
-    const warehouseListEl = document.getElementById('warehouseList');
-    if (warehouseListEl) warehouseListEl.innerHTML = generateListSkeleton(3);
+      }
+      const warehouseListEl = document.getElementById('warehouseList');
+      if (warehouseListEl) warehouseListEl.innerHTML = generateListSkeleton(3);
 
-    try {
+      try {
         const res = await fetch(`${CONFIG.GAS_URL}?action=getWarehouseItems&lineId=${userState.lineId}`);
         const ownedItems = await res.json();
         if (!ownedItems || ownedItems.error) throw new Error(ownedItems.error || 'Failed to load data');
 
         if (ownedItems.length === 0) {
-            warehouseListEl.innerHTML = '<li class="text-center text-gray-400 py-4">ยังไม่มีของรางวัลในคลัง</li>';
-            return;
+          warehouseListEl.innerHTML = '<li class="text-center text-gray-400 py-4">ยังไม่มีของรางวัลในคลัง</li>';
+          return;
         }
 
         warehouseListEl.innerHTML = ownedItems.map(item => {
-            let statusBlockHTML = ''; 
-            let detailsBlockHTML = ''; 
+          let statusBlockHTML = '';
+          let detailsBlockHTML = '';
 
-            switch (item.status) {
-                case 'claimed':
-                    statusBlockHTML = `<div class="badge badge-success">รับแล้ว</div>`;
-                    detailsBlockHTML = `<div class="text-xs text-gray-500">วันที่รับ: ${item.claimDate || '-'}</div>`;
-                    break;
-                case 'shipped':
-                    statusBlockHTML = `<div class="badge badge-info">จัดส่งแล้ว</div>`;
-                    if (item.expressTracking && String(item.expressTracking).trim() !== '') {
-                        detailsBlockHTML = `
+          switch (item.status) {
+            case 'claimed':
+              statusBlockHTML = `<div class="badge badge-success">รับแล้ว</div>`;
+              detailsBlockHTML = `<div class="text-xs text-gray-500">วันที่รับ: ${item.claimDate || '-'}</div>`;
+              break;
+            case 'shipped':
+              statusBlockHTML = `<div class="badge badge-info">จัดส่งแล้ว</div>`;
+              if (item.expressTracking && String(item.expressTracking).trim() !== '') {
+                detailsBlockHTML = `
                             <div class="text-xs text-gray-500">วันที่จัดส่ง: ${item.claimDate || '-'}</div>
                             <div class="text-xs text-gray-700 font-semibold mt-1">Tracking: ${item.expressTracking}</div>
                         `;
-                    } else {
-                        detailsBlockHTML = `<div class="text-xs text-gray-500">วันที่จัดส่ง: ${item.claimDate || '-'}</div>`;
-                    }
-                    break;
-                case 'pending_claim':
-                default:
-                    statusBlockHTML = `<button class="btn btn-neutral btn-sm claim-btn" data-unique-id="${item.uniqueId}" data-item-name="${item.itemName}">รับของ</button>`;
-                    detailsBlockHTML = `<div class="badge badge-warning badge-outline">รอรับ</div>`;
-                    break;
-            }
+              } else {
+                detailsBlockHTML = `<div class="text-xs text-gray-500">วันที่จัดส่ง: ${item.claimDate || '-'}</div>`;
+              }
+              break;
+            case 'pending_claim':
+            default:
+              statusBlockHTML = `<button class="btn btn-neutral btn-sm claim-btn" data-unique-id="${item.uniqueId}" data-item-name="${item.itemName}">รับของ</button>`;
+              detailsBlockHTML = `<div class="badge badge-warning badge-outline">รอรับ</div>`;
+              break;
+          }
 
-            return `
+          return `
                 <li class="bg-white p-4 rounded-lg shadow-sm">
                     <div class="flex justify-between items-start space-x-4">
                         <div class="flex-grow">
@@ -1033,15 +1050,15 @@
         }).join('');
 
         document.querySelectorAll('.claim-btn').forEach(button => {
-            button.addEventListener('click', handleClaimButtonClick);
+          button.addEventListener('click', handleClaimButtonClick);
         });
 
-    } catch (e) {
+      } catch (e) {
         console.error("Error in initWarehouse:", e);
         showAlert("เกิดข้อผิดพลาด", "ไม่สามารถโหลดคลังของรางวัลได้");
         if (warehouseListEl) warehouseListEl.innerHTML = `<li class="text-center text-red-500 py-4">เกิดข้อผิดพลาดในการโหลดคลัง</li>`;
+      }
     }
-}
     function handleClaimButtonClick(event) {
       if (warehousePollingInterval) { clearInterval(warehousePollingInterval); warehousePollingInterval = null; }
       const btn = event.currentTarget;
@@ -1092,4 +1109,5 @@
     initializeApp();
   </script>
 </body>
+
 </html>
