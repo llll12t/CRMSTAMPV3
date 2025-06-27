@@ -9,8 +9,28 @@
   <!-- Make sure you have this config file -->
   <script src="config-admin.js"></script>
   
-  <!-- External Libraries -->
+  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Tailwind CSS Configuration for CDN (NEW THEME) -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'thm-bg': '#ECE6E2',       // Main background color
+            'thm-primary': '#866147',   // Primary action/accent color
+            'thm-secondary': '#A67F68', // A lighter shade of primary for secondary actions
+            'thm-accent': '#C5A894',    // A light accent color
+            'thm-primary-dark': '#6c4e38',   // Darker shade for hover
+            'thm-secondary-dark': '#85634d', // Darker shade for hover
+          },
+        },
+      },
+    };
+  </script>
+
+  <!-- External Libraries -->
   <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 
   <style>
@@ -24,21 +44,18 @@
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     .loading-spinner { 
       border: 2px solid rgba(0, 0, 0, 0.5); 
-      border-left-color: #1f2937; 
+      border-left-color: #866147; /* Use new theme color */
       border-radius: 50%; 
-      width: 24px; /* Adjusted size for inline use */
-      height: 24px; /* Adjusted size for inline use */
+      width: 24px;
+      height: 24px;
       animation: spin 1s linear infinite; 
     }
-    .page-loader { 
-      display: flex; flex-direction: column; align-items: center; 
-      justify-content: center; gap: 1rem; padding: 2rem; 
-      color: #6b7280; 
-    }
+    /* Updated Modal styles for new theme */
     .modal-overlay {
         position: fixed; inset: 0; z-index: 50;
         display: flex; align-items: center; justify-content: center;
         background-color: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(2px);
         opacity: 0; transition: opacity 0.3s ease;
         pointer-events: none;
     }
@@ -73,12 +90,12 @@
       </main>
   </div>
 
-  <!-- MODALS -->
+  <!-- MODALS (Styled with new theme) -->
   <div id="customAlertDialog" class="modal-overlay">
     <div class="modal-box">
         <h3 id="customAlertTitle" class="font-bold text-lg mb-3 text-center text-gray-800"></h3>
         <p id="customAlertMessage" class="py-4 whitespace-pre-line text-center text-gray-600"></p>
-        <div class="mt-4"><button id="customAlertButton" class="w-full bg-gray-800 text-white font-bold py-2 px-4 rounded-lg hover:bg-gray-700">ตกลง</button></div>
+        <div class="mt-4"><button id="customAlertButton" class="w-full bg-thm-primary text-white font-bold py-2 px-4 rounded-lg hover:bg-thm-primary-dark">ตกลง</button></div>
     </div>
   </div>
 
@@ -88,7 +105,7 @@
         <p id="customConfirmMessage" class="py-4 whitespace-pre-line text-center text-gray-600"></p>
         <div class="mt-4 flex justify-around gap-4">
             <button id="customConfirmCancelButton" class="flex-1 bg-gray-200 text-gray-800 font-bold py-2 px-4 rounded-lg hover:bg-gray-300">ยกเลิก</button>
-            <button id="customConfirmConfirmButton" class="flex-1 bg-gray-800 text-white font-bold py-2 px-4 rounded-lg hover:bg-gray-700">ยืนยัน</button>
+            <button id="customConfirmConfirmButton" class="flex-1 bg-thm-primary text-white font-bold py-2 px-4 rounded-lg hover:bg-thm-primary-dark">ยืนยัน</button>
         </div>
     </div>
   </div>
@@ -104,10 +121,10 @@
   <!-- Main Template -->
   <template id="view-cashier-page">
     <div class="w-full max-w-4xl mx-auto">
-      <!-- Custom Tabs -->
+      <!-- Custom Tabs (Styled with new theme) -->
       <div class="flex border-b border-gray-200 mb-4" id="main-tabs-container">
         <button data-tab="scan" class="tab-button flex-1 py-3 px-1 text-center font-semibold text-gray-500 border-b-2 border-transparent hover:border-gray-300 hover:text-gray-700">สแกนรับของ</button>
-        <button data-tab="pos" class="tab-button flex-1 py-3 px-1 text-center font-semibold text-gray-500 border-b-2 border-transparent hover:border-gray-300 hover:text-gray-700">ให้แต้ม</button>
+        <button data-tab="pos" class="tab-button flex-1 py-3 px-1 text-center font-semibold text-gray-500 border-b-2 border-transparent hover:border-gray-300 hover:text-gray-700">ให้แต้ม/แสตมป์</button>
         <button data-tab="history" class="tab-button flex-1 py-3 px-1 text-center font-semibold text-gray-500 border-b-2 border-transparent hover:border-gray-300 hover:text-gray-700">ประวัติ</button>
       </div>
 
@@ -117,7 +134,7 @@
             <h3 class="text-xl font-bold mb-4 text-gray-800">สแกน QR Code รับของ</h3>
             <div id="qr-reader" class="w-full max-w-sm h-64 mx-auto bg-gray-200 rounded-lg mb-4 border-2 border-dashed border-gray-300 overflow-hidden"></div>
             <div class="w-full max-w-sm mx-auto">
-                <button id="startScanBtn" class="w-full bg-gray-800 text-white font-bold py-2 px-4 rounded-lg hover:bg-gray-700">เริ่มสแกน</button>
+                <button id="startScanBtn" class="w-full bg-thm-primary text-white font-bold py-2 px-4 rounded-lg hover:bg-thm-primary-dark">เริ่มสแกน</button>
                 <button id="stopScanBtn" class="w-full bg-gray-200 text-gray-800 font-bold py-2 px-4 rounded-lg hover:bg-gray-300 hidden">หยุดสแกน</button>
             </div>
             <div id="scan-result" class="mt-4 text-md font-semibold h-10 text-gray-700 flex items-center justify-center"></div>
@@ -129,8 +146,8 @@
             <form id="addPointsForm" onsubmit="event.preventDefault()" class="space-y-6">
                 <div>
                   <label class="block text-sm font-semibold text-gray-700 mb-1">1. ระบุลูกค้า</label>
-                  <input type="text" id="addPointsIdentifier" placeholder="กรอก Line ID, เบอร์โทร..." class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required />
-                  <button type="button" id="scanCustomerBtn" class="w-full mt-2 bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-700 flex items-center justify-center gap-2"> <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 0h-4m4 0l-5-5" /></svg> สแกน QR ลูกค้า </button>
+                  <input type="text" id="addPointsIdentifier" placeholder="กรอก Line ID, เบอร์โทร..." class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-thm-primary" required />
+                  <button type="button" id="scanCustomerBtn" class="w-full mt-2 bg-thm-secondary text-white font-semibold py-2 px-4 rounded-lg hover:bg-thm-secondary-dark flex items-center justify-center gap-2"> <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 0h-4m4 0l-5-5" /></svg> สแกน QR ลูกค้า </button>
                 </div>
                 <div>
                   <label class="block text-sm font-semibold text-gray-700 mb-1">2. เลือกวิธีให้แต้ม</label>
@@ -143,25 +160,33 @@
                     <div class="bg-gray-100 p-3 rounded-lg space-y-4 border border-gray-200">
                       <div>
                         <label class="block text-xs text-gray-600 mb-1">เลือกสินค้า</label>
-                        <select id="productList" class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"><option disabled selected>กำลังโหลด...</option></select>
+                        <select id="productList" class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-thm-primary"><option disabled selected>กำลังโหลด...</option></select>
                       </div>
                       <div class="flex items-end gap-2">
                           <div class="flex-1">
                             <label class="block text-xs text-gray-600 mb-1">จำนวน</label>
-                            <input type="number" id="productQuantity" value="1" min="1" class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                            <input type="number" id="productQuantity" value="1" min="1" class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-thm-primary" />
                           </div>
-                          <button type="button" id="addItemToBillBtn" class="bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-700">เพิ่มลงบิล</button>
+                          <button type="button" id="addItemToBillBtn" class="bg-thm-secondary text-white font-semibold py-2 px-4 rounded-lg hover:bg-thm-secondary-dark">เพิ่มลงบิล</button>
                       </div>
                     </div>
                     <div class="border-t border-gray-200"></div>
                     <div id="billItemsContainer" class="space-y-2 max-h-48 overflow-y-auto pr-2"><p class="text-center text-gray-400">ยังไม่มีรายการ</p></div>
-                    <div class="text-right text-lg font-bold text-gray-800">แต้มรวม: <span id="totalPointsDisplay" class="text-blue-600">0</span></div>
+                    <div class="text-right text-lg font-bold text-gray-800">แต้มรวม: <span id="totalPointsDisplay" class="text-thm-primary">0</span></div>
                 </div>
                 <div id="manualModeSection" class="space-y-4 hidden">
                     <div><label class="block text-xs text-gray-600 mb-1">จำนวนแต้ม</label><input type="number" id="addPointsAmount" placeholder="เช่น 50" class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg" min="1" /></div>
                     <div><label class="block text-xs text-gray-600 mb-1">เหตุผล</label><input type="text" id="addPointsReason" placeholder="เช่น ของขวัญพิเศษ" class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg" /></div>
                 </div>
-                <div class="pt-2"><button type="submit" id="addPointsSubmitBtn" class="w-full bg-gray-800 text-white text-lg font-bold py-3 px-4 rounded-lg hover:bg-gray-700">ยืนยันและให้แต้ม</button></div>
+                
+                <!-- NEW STAMPS SECTION -->
+                <div class="border-t pt-4">
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">3. ให้แสตมป์เพิ่มเติม (ถ้ามี)</label>
+                    <input type="number" id="addStampsAmount" class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-thm-primary" placeholder="กรอกจำนวนแสตมป์" value="0" min="0" />
+                    <p class="text-xs text-gray-500 mt-1">ใส่ 0 หากไม่ต้องการให้แสตมป์</p>
+                </div>
+
+                <div class="pt-2"><button type="submit" id="addPointsSubmitBtn" class="w-full bg-thm-primary text-white text-lg font-bold py-3 px-4 rounded-lg hover:bg-thm-primary-dark">ยืนยันรายการ</button></div>
             </form>
         </div>
       </div>
@@ -212,11 +237,9 @@
     async function fetchData(action, params = {}) { const url = new URL(CONFIG.GAS_URL_ADMIN); url.searchParams.append('action', action); for (const k in params) { if (params[k]) url.searchParams.append(k, params[k]); } try { const r = await fetch(url); if (!r.ok) throw new Error(`Server responded with status: ${r.status}`); const data = await r.json(); if(data.error) throw new Error(data.error); return data; } catch (e) { showAlert('Error', `Fetch failed: ${e.message}`); throw e; } }
     async function postData(action, data) { try { const r = await fetch(CONFIG.GAS_URL_ADMIN, { method: 'POST', body: JSON.stringify({ action, ...data }) }); if (!r.ok) throw new Error(`Server responded with status: ${r.status}`); const responseText = await r.text(); try { const jsonData = JSON.parse(responseText); if(jsonData.success === false) throw new Error(jsonData.error || 'Unknown error'); return jsonData.message || responseText; } catch (jsonError) { return responseText; } } catch (e) { showAlert('Error', `Request failed: ${e.message}`); throw e; } }
 
-    // === APP LOGIC (UPDATED) ===
+    // === APP LOGIC ===
     async function initCashierPage() {
-        // [IMPROVEMENT] - Scanners are now managed more cleanly
-        let claimScanner = null; 
-        let customerScanner = null;
+        let claimScanner = null, customerScanner = null;
         
         // --- Tab Switching Logic ---
         const tabsContainer = document.getElementById('main-tabs-container');
@@ -224,122 +247,87 @@
         const tabPanels = document.querySelectorAll('.tab-panel');
         
         function switchTab(tabId) {
-            // [CRITICAL FIX] - Stop all scanners before switching tabs to prevent camera from running in the background.
             stopClaimScanner();
             stopCustomerScanner();
-
             tabButtons.forEach(btn => {
-                btn.classList.toggle('text-blue-600', btn.dataset.tab === tabId);
-                btn.classList.toggle('border-blue-600', btn.dataset.tab === tabId);
-                btn.classList.toggle('text-gray-500', btn.dataset.tab !== tabId);
-                btn.classList.toggle('border-transparent', btn.dataset.tab !== tabId);
+                const isSelected = btn.dataset.tab === tabId;
+                btn.classList.toggle('text-thm-primary', isSelected);
+                btn.classList.toggle('border-thm-primary', isSelected);
+                btn.classList.toggle('text-gray-500', !isSelected);
+                btn.classList.toggle('border-transparent', !isSelected);
             });
-            tabPanels.forEach(panel => {
-                panel.classList.toggle('hidden', panel.id !== `${tabId}-tab-panel`);
-            });
+            tabPanels.forEach(panel => { panel.classList.toggle('hidden', panel.id !== `${tabId}-tab-panel`); });
             if (tabId === 'history') { loadHistory(); }
         }
-        tabsContainer.addEventListener('click', (e) => {
-            if(e.target.matches('.tab-button')) { switchTab(e.target.dataset.tab); }
-        });
+        tabsContainer.addEventListener('click', (e) => { if(e.target.matches('.tab-button')) { switchTab(e.target.dataset.tab); } });
         
-        // --- Scan Claim Logic (Updated to match the original robust version) ---
-        const startScanBtn = document.getElementById('startScanBtn');
-        const stopScanBtn = document.getElementById('stopScanBtn');
-        const scanResultEl = document.getElementById('scan-result');
-
-        const onScanSuccessClaim = async (decodedText) => { 
-            await stopClaimScanner(); 
-            // Show a temporary loading state
-            scanResultEl.innerHTML = `<div class="loading-spinner mx-auto"></div>`; 
-            try { 
-                const responseText = await postData('claimItemByUniqueId', { uniqueId: decodedText }); 
-                showAlert('ผลการยืนยัน', responseText); 
-                scanResultEl.innerHTML = responseText.includes('สำเร็จ') ? `<span class="text-green-600">✅ ${responseText}</span>` : `<span class="text-orange-600">⚠️ ${responseText}</span>`; 
-            } catch (error) { 
-                scanResultEl.innerHTML = `<span class="text-red-600">❌ ${error.message}</span>`; 
-            } 
-        };
-
-        const startClaimScanner = () => { 
-            if (!claimScanner) { claimScanner = new Html5Qrcode("qr-reader"); } 
-            // Prevent starting if already scanning
-            if (claimScanner && claimScanner.isScanning) { return; }
-            
-            claimScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: { width: 250, height: 250 } }, onScanSuccessClaim, () => {})
-                .then(() => { 
-                    startScanBtn.classList.add('hidden'); 
-                    stopScanBtn.classList.remove('hidden'); 
-                    scanResultEl.textContent = 'กรุณาหันกล้องไปที่ QR Code'; 
-                }).catch(err => { 
-                    showAlert("ข้อผิดพลาด", "ไม่สามารถเปิดกล้องได้ กรุณาตรวจสอบการอนุญาตใช้งานกล้อง"); 
-                }); 
-        };
-        
-        const stopClaimScanner = async () => { 
-            if (claimScanner && claimScanner.isScanning) { 
-                try { 
-                    await claimScanner.stop(); 
-                } catch (err) { 
-                    console.error("Failed to stop claim scanner.", err);
-                }
-            }
-            // Always reset button states
-            startScanBtn.classList.remove('hidden'); 
-            stopScanBtn.classList.add('hidden'); 
-        };
-        
-        startScanBtn.onclick = startClaimScanner; 
-        stopScanBtn.onclick = stopClaimScanner;
+        // --- Scan Claim Logic ---
+        const startScanBtn = document.getElementById('startScanBtn'), stopScanBtn = document.getElementById('stopScanBtn'), scanResultEl = document.getElementById('scan-result');
+        const onScanSuccessClaim = async (decodedText) => { await stopClaimScanner(); scanResultEl.innerHTML = `<div class="loading-spinner mx-auto"></div>`; try { const responseText = await postData('claimItemByUniqueId', { uniqueId: decodedText }); showAlert('ผลการยืนยัน', responseText); scanResultEl.innerHTML = responseText.includes('สำเร็จ') ? `<span class="text-green-600">✅ ${responseText}</span>` : `<span class="text-orange-600">⚠️ ${responseText}</span>`; } catch (error) { scanResultEl.innerHTML = `<span class="text-red-600">❌ ${error.message}</span>`; } };
+        const startClaimScanner = () => { if (!claimScanner) { claimScanner = new Html5Qrcode("qr-reader"); } if (claimScanner && claimScanner.isScanning) { return; } claimScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: { width: 250, height: 250 } }, onScanSuccessClaim, () => {}).then(() => { startScanBtn.classList.add('hidden'); stopScanBtn.classList.remove('hidden'); scanResultEl.textContent = 'กรุณาหันกล้องไปที่ QR Code'; }).catch(err => { showAlert("ข้อผิดพลาด", "ไม่สามารถเปิดกล้องได้"); }); };
+        const stopClaimScanner = async () => { if (claimScanner && claimScanner.isScanning) { try { await claimScanner.stop(); } catch (err) {} } startScanBtn.classList.remove('hidden'); stopScanBtn.classList.add('hidden'); };
+        startScanBtn.onclick = startClaimScanner; stopScanBtn.onclick = stopClaimScanner;
 
         // --- Scan Customer Logic ---
-        const scanCustomerModal = document.getElementById('scanCustomerModal');
-        const scanCustomerBtn = document.getElementById('scanCustomerBtn');
-        const closeScanCustomerBtn = document.getElementById('closeScanCustomerBtn');
-        const customerIdentifierInput = document.getElementById('addPointsIdentifier');
+        const scanCustomerModal = document.getElementById('scanCustomerModal'), scanCustomerBtn = document.getElementById('scanCustomerBtn'), closeScanCustomerBtn = document.getElementById('closeScanCustomerBtn'), customerIdentifierInput = document.getElementById('addPointsIdentifier');
+        const onScanSuccessCustomer = async (decodedText) => { customerIdentifierInput.value = decodedText; customerIdentifierInput.focus(); await stopCustomerScanner(); };
+        const startCustomerScanner = () => { if (!customerScanner) { customerScanner = new Html5Qrcode("customer-qr-reader"); } if (customerScanner && customerScanner.isScanning) { return; } scanCustomerModal.classList.add('active'); customerScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: { width: 250, height: 250 } }, onScanSuccessCustomer, () => {}).catch(err => { showAlert("ข้อผิดพลาด", "ไม่สามารถเปิดกล้องสแกนลูกค้าได้"); scanCustomerModal.classList.remove('active'); }); };
+        const stopCustomerScanner = async () => { if (customerScanner && customerScanner.isScanning) { try { await customerScanner.stop(); } catch (err) {} } scanCustomerModal.classList.remove('active'); };
+        scanCustomerBtn.onclick = startCustomerScanner; closeScanCustomerBtn.onclick = stopCustomerScanner;
 
-        const onScanSuccessCustomer = async (decodedText) => { 
-            customerIdentifierInput.value = decodedText;
-            customerIdentifierInput.focus(); 
-            await stopCustomerScanner(); 
-        };
-        
-        const startCustomerScanner = () => { 
-            if (!customerScanner) { customerScanner = new Html5Qrcode("customer-qr-reader"); }
-            if (customerScanner && customerScanner.isScanning) { return; }
-
-            scanCustomerModal.classList.add('active'); 
-            customerScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: { width: 250, height: 250 } }, onScanSuccessCustomer, () => {})
-                .catch(err => { 
-                    showAlert("ข้อผิดพลาด", "ไม่สามารถเปิดกล้องสแกนลูกค้าได้"); 
-                    scanCustomerModal.classList.remove('active'); 
-                }); 
-        };
-
-        const stopCustomerScanner = async () => { 
-            if (customerScanner && customerScanner.isScanning) { 
-                try { 
-                    await customerScanner.stop(); 
-                } catch (err) { 
-                    console.error("Failed to stop customer scanner.", err);
-                } 
-            }
-            // Always close the modal
-            scanCustomerModal.classList.remove('active'); 
-        };
-        
-        scanCustomerBtn.onclick = startCustomerScanner; 
-        closeScanCustomerBtn.onclick = stopCustomerScanner;
-
-        // --- Add Points (POS) Logic ---
+        // --- Add Points & Stamps (POS) Logic (UPDATED) ---
         const addPointsForm = document.getElementById('addPointsForm'), addPointsSubmitBtn = document.getElementById('addPointsSubmitBtn'), productModeSection = document.getElementById('productModeSection'), manualModeSection = document.getElementById('manualModeSection'), productListSelect = document.getElementById('productList'), quantityInput = document.getElementById('productQuantity'), addItemBtn = document.getElementById('addItemToBillBtn'), billContainer = document.getElementById('billItemsContainer'), totalPointsDisplay = document.getElementById('totalPointsDisplay'), posModeContainer = document.getElementById('pos-mode-container');
         let allProducts = [], billItems = [], currentPosMode = 'product';
         try { allProducts = await fetchData('getProducts'); updateProductDropdown(); } catch (e) { productListSelect.innerHTML = `<option disabled selected>โหลดสินค้าล้มเหลว</option>`; }
         function updateProductDropdown() { const productIdsInBill = billItems.map(item => item.id); const availableProducts = allProducts.filter(p => !productIdsInBill.includes(p.id)); productListSelect.innerHTML = ''; if (availableProducts.length > 0) { availableProducts.forEach(p => { const option = document.createElement('option'); option.value = p.id; option.textContent = `${p.name} (${p.points} แต้ม)`; productListSelect.appendChild(option); }); } else { productListSelect.innerHTML = '<option disabled selected>เพิ่มสินค้าครบแล้ว</option>'; } }
-        function renderBill() { billContainer.innerHTML = ''; let totalPoints = 0; if (billItems.length === 0) { billContainer.innerHTML = '<p class="text-center text-gray-400">ยังไม่มีรายการ</p>'; totalPointsDisplay.textContent = '0'; return; } billItems.forEach(item => { const itemPoints = item.points * item.quantity; totalPoints += itemPoints; const itemDiv = document.createElement('div'); itemDiv.className = 'flex items-center justify-between p-2 bg-gray-100 rounded-md'; itemDiv.innerHTML = `<div><span class="font-semibold text-gray-800">${item.name}</span> <span class="text-sm text-gray-500">x ${item.quantity}</span></div><div><span class="font-bold text-blue-600">${itemPoints} แต้ม</span><button type="button" class="ml-2 p-1 remove-item-btn text-red-500 hover:bg-red-100 rounded-full" data-id="${item.id}"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button></div>`; billContainer.appendChild(itemDiv); }); totalPointsDisplay.textContent = totalPoints.toLocaleString(); billContainer.querySelectorAll('.remove-item-btn').forEach(btn => { btn.onclick = (e) => { billItems = billItems.filter(item => item.id !== e.currentTarget.dataset.id); renderBill(); updateProductDropdown(); }; }); }
-        posModeContainer.addEventListener('click', (e) => { if(e.target.matches('.pos-mode-button')) { currentPosMode = e.target.dataset.mode; posModeContainer.querySelectorAll('.pos-mode-button').forEach(b => {b.classList.toggle('bg-gray-800', b.dataset.mode === currentPosMode); b.classList.toggle('text-white', b.dataset.mode === currentPosMode);}); productModeSection.classList.toggle('hidden', currentPosMode !== 'product'); manualModeSection.classList.toggle('hidden', currentPosMode !== 'manual'); }});
+        function renderBill() { billContainer.innerHTML = ''; let totalPoints = 0; if (billItems.length === 0) { billContainer.innerHTML = '<p class="text-center text-gray-400">ยังไม่มีรายการ</p>'; totalPointsDisplay.textContent = '0'; return; } billItems.forEach(item => { const itemPoints = item.points * item.quantity; totalPoints += itemPoints; const itemDiv = document.createElement('div'); itemDiv.className = 'flex items-center justify-between p-2 bg-gray-100 rounded-md'; itemDiv.innerHTML = `<div><span class="font-semibold text-gray-800">${item.name}</span> <span class="text-sm text-gray-500">x ${item.quantity}</span></div><div><span class="font-bold text-thm-primary">${itemPoints} แต้ม</span><button type="button" class="ml-2 p-1 remove-item-btn text-red-500 hover:bg-red-100 rounded-full" data-id="${item.id}"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button></div>`; billContainer.appendChild(itemDiv); }); totalPointsDisplay.textContent = totalPoints.toLocaleString(); billContainer.querySelectorAll('.remove-item-btn').forEach(btn => { btn.onclick = (e) => { billItems = billItems.filter(item => item.id !== e.currentTarget.dataset.id); renderBill(); updateProductDropdown(); }; }); }
+        posModeContainer.addEventListener('click', (e) => { if(e.target.matches('.pos-mode-button')) { currentPosMode = e.target.dataset.mode; posModeContainer.querySelectorAll('.pos-mode-button').forEach(b => {const isSelected = b.dataset.mode === currentPosMode; b.classList.toggle('bg-thm-primary', isSelected); b.classList.toggle('text-white', isSelected);}); productModeSection.classList.toggle('hidden', currentPosMode !== 'product'); manualModeSection.classList.toggle('hidden', currentPosMode !== 'manual'); }});
         addItemBtn.onclick = () => { const selectedId = productListSelect.value; if (!selectedId) return; const product = allProducts.find(p => p.id === selectedId); const quantity = parseInt(quantityInput.value, 10); if (product && quantity > 0) { billItems.push({ ...product, quantity }); renderBill(); updateProductDropdown(); quantityInput.value = 1; } };
-        addPointsForm.onsubmit = async (e) => { e.preventDefault(); const identifier = document.getElementById('addPointsIdentifier').value.trim(); if (!identifier) return showAlert('ข้อมูลไม่ครบ', 'กรุณาระบุลูกค้า'); let payload = { identifier }, confirmMessage = ''; if (currentPosMode === 'product') { if (billItems.length === 0) return showAlert('ข้อมูลไม่ครบ', 'กรุณาเพิ่มสินค้าลงในบิล'); payload.itemsPurchased = billItems.map(item => ({ productId: item.id, quantity: item.quantity })); const totalPoints = billItems.reduce((sum, item) => sum + (item.points * item.quantity), 0); const itemSummary = billItems.map(item => `${item.name} x${item.quantity}`).join(',\n'); confirmMessage = `ยืนยันให้ ${totalPoints} แต้ม\nจาก:\n${itemSummary}\n\nสำหรับผู้ใช้: "${identifier}"?`; } else { const points = document.getElementById('addPointsAmount').value; const reason = document.getElementById('addPointsReason').value.trim(); if (!points || parseInt(points) < 1 || !reason) return showAlert('ข้อมูลไม่ครบ', 'กรุณากรอกแต้มและเหตุผล'); payload.points = parseInt(points, 10); payload.reason = reason; confirmMessage = `ยืนยันให้ ${payload.points} แต้ม\nเหตุผล: ${payload.reason}\n\nสำหรับผู้ใช้: "${identifier}"?`; } if (await showConfirm('ยืนยันการให้แต้ม', confirmMessage)) { addPointsSubmitBtn.classList.add('opacity-50', 'cursor-not-allowed'); addPointsSubmitBtn.disabled = true; try { const message = await postData('addPointsToUser', payload); showAlert('สำเร็จ', message || 'เพิ่มแต้มเรียบร้อยแล้ว'); addPointsForm.reset(); billItems = []; renderBill(); updateProductDropdown(); } catch(e) {} finally { addPointsSubmitBtn.classList.remove('opacity-50', 'cursor-not-allowed'); addPointsSubmitBtn.disabled = false; } } };
+        
+        addPointsForm.onsubmit = async (e) => {
+            e.preventDefault();
+            const identifier = document.getElementById('addPointsIdentifier').value.trim();
+            const stampsToAdd = parseInt(document.getElementById('addStampsAmount').value, 10) || 0;
+            if (!identifier) return showAlert('ข้อมูลไม่ครบ', 'กรุณาระบุลูกค้า');
+            
+            let payload = { identifier, stampsToAdd };
+            let totalPoints = 0;
+            let confirmParts = [];
+
+            if (currentPosMode === 'product') {
+                totalPoints = billItems.reduce((sum, item) => sum + (item.points * item.quantity), 0);
+                if (billItems.length > 0) {
+                     payload.itemsPurchased = billItems.map(item => ({ productId: item.id, quantity: item.quantity }));
+                     confirmParts.push(`ให้ ${totalPoints} แต้ม จากรายการสินค้า`);
+                }
+            } else { // manual mode
+                const points = document.getElementById('addPointsAmount').value;
+                const reason = document.getElementById('addPointsReason').value.trim();
+                totalPoints = parseInt(points, 10) || 0;
+                if (totalPoints > 0) {
+                    if (!reason) return showAlert('ข้อมูลไม่ครบ', 'กรุณากรอกเหตุผลสำหรับแต้มที่กรอกเอง');
+                    payload.points = totalPoints;
+                    payload.reason = reason;
+                    confirmParts.push(`ให้ ${totalPoints} แต้ม (เหตุผล: ${reason})`);
+                }
+            }
+            if (stampsToAdd > 0) { confirmParts.push(`ให้ ${stampsToAdd} แสตมป์`); }
+            if (confirmParts.length === 0) { return showAlert('ไม่มีรายการ', 'กรุณาเพิ่มสินค้า, กรอกแต้ม, หรือระบุจำนวนแสตมป์'); }
+            
+            const confirmMessage = `ยืนยันการทำรายการสำหรับ "${identifier}":\n\n- ${confirmParts.join('\n- ')}`;
+
+            if (await showConfirm('ยืนยันรายการ', confirmMessage)) {
+                addPointsSubmitBtn.classList.add('opacity-50', 'cursor-not-allowed'); addPointsSubmitBtn.disabled = true;
+                try {
+                    const message = await postData('addPointsToUser', payload);
+                    showAlert('สำเร็จ', message || 'ทำรายการเรียบร้อยแล้ว');
+                    addPointsForm.reset();
+                    document.getElementById('addStampsAmount').value = 0; // Explicitly reset stamps
+                    billItems = []; renderBill(); updateProductDropdown();
+                } catch(e) { /* Error handled by postData */ } 
+                finally { addPointsSubmitBtn.classList.remove('opacity-50', 'cursor-not-allowed'); addPointsSubmitBtn.disabled = false; }
+            }
+        };
         renderBill();
         posModeContainer.querySelector('[data-mode="product"]').click(); 
         
