@@ -329,7 +329,7 @@
   </dialog>
 
   <script>
-    // --- GLOBAL STATE & CACHE ---
+  // --- GLOBAL STATE & CACHE ---
     let liffInitialized = false;
     const userState = { profile: null, lineId: "", points: 0, totalPoints: 0, coffeeStamps: 0, pointsChanged: false, level: "Member", customTag: "" };
     const dataCache = { events: null, redeemItems: null, eventDetails: {}, userProfileFull: null, history: null, levelSettings: null };
@@ -409,6 +409,8 @@
         const userRes = await fetch(`${CONFIG.GAS_URL}?action=getUserInfo&lineId=${userState.lineId}`);
         const userData = await userRes.json();
         if (userData && !userData.error) {
+          // <<< เพิ่ม LOG จุดที่ 1: ตรวจสอบข้อมูลที่ได้จากการอัปเดตสถานะ
+          console.log('[DEBUG] Data from fetchAndUpdateUserState:', userData);
           userState.points = parseInt(userData.point || 0, 10);
           userState.totalPoints = parseInt(userData.totalPoints || 0, 10);
           userState.coffeeStamps = parseInt(userData.coffeeStamps || 0, 10);
@@ -417,7 +419,8 @@
           dataCache.userProfileFull = userData;
           pointValEl.textContent = userState.points;
           userState.pointsChanged = true;
-          console.log(`User state updated: Points=${userState.points}, TotalPoints=${userState.totalPoints}, Stamps=${userState.coffeeStamps}`);
+          // <<< แก้ไข LOG เดิมให้ชัดเจนขึ้น
+          console.log(`[DEBUG] User state RE-UPDATED: Points=${userState.points}, TotalPoints=${userState.totalPoints}, Stamps=${userState.coffeeStamps}`);
         } else { console.error("Failed to fetch user data after action:", userData?.error || "Unknown error"); }
       } catch (e) { console.error("Error fetching user info after action:", e); }
     }
@@ -446,6 +449,9 @@
         const userData = await userRes.json();
         if (!userData || !userData.isRegistered) { window.location.href = 'Register.html'; return false; }
         
+        // <<< เพิ่ม LOG จุดที่ 2 (สำคัญที่สุด): ตรวจสอบข้อมูลดิบที่ได้จาก Server ตอนเริ่มแอป
+        console.log('[DEBUG] RAW User Data from Server on Init:', userData);
+        
         dataCache.history = await histRes.json();
         dataCache.events = await eventsRes.json(); 
         dataCache.redeemItems = await redeemRes.json();
@@ -455,17 +461,18 @@
 
         userState.points = parseInt(userData.point || 0, 10);
         userState.totalPoints = parseInt(userData.totalPoints || 0, 10);
-        userState.coffeeStamps = parseInt(userData.coffeeStamps || 0, 10);
+        userState.coffeeStamps = parseInt(userData.coffeeStamps || 0, 10); // <--- บรรทัดนี้สำคัญ
         userState.level = userData.level || 'Member';
         userState.customTag = userData.customTag || '';
         dataCache.userProfileFull = userData;
         pointValEl.textContent = userState.points;
         userState.pointsChanged = false;
+
       } catch (error) { console.error("Failed to fetch initial data:", error); pointValEl.textContent = 'N/A'; showAlert("ข้อผิดพลาด", "ไม่สามารถโหลดข้อมูลผู้ใช้ได้ กรุณาลองใหม่"); return false; }
       return true;
     }
     
-    // --- ROUTER ---
+    // ... (ส่วน router และอื่นๆ ไม่ต้องแก้ไข) ...
     const routes = {
       '#dashboard': { title: 'หน้าหลัก', tpl: 'view-dashboard', init: initDashboard },
       '#event': { title: 'กิจกรรม', tpl: 'view-event', init: initEvent },
@@ -498,7 +505,7 @@
       catch (error) { console.error(`Error initializing view ${route.tpl}:`, error); showAlert('เกิดข้อผิดพลาด', 'ไม่สามารถโหลดข้อมูลหน้านี้ได้'); }
     }
 
-    // --- SKELETONS & HELPERS ---
+    // ... (ส่วน skeletons และ helpers ไม่ต้องแก้ไข) ...
     function generateListSkeleton(count) { return Array.from({ length: count }).map(_ => `<li class="flex justify-between items-center animate-pulse py-3"><div class="space-y-2 flex-1"><div class="h-4 bg-gray-200 rounded w-1/2"></div><div class="h-3 bg-gray-200 rounded w-1/3 mt-1"></div></div><div class="h-6 w-12 bg-gray-200 rounded-full"></div></li>`).join(""); }
     function generateCardSkeleton(count) { return Array.from({ length: count }).map(_ => `<li class="bg-white p-4 rounded shadow-sm loading-card-animation"><div class="h-24 bg-gray-200 rounded-md mb-3"></div><div class="h-4 bg-gray-200 rounded w-2/3 mb-2"></div><div class="h-3 bg-gray-200 rounded w-1/2 mb-3"></div><div class="h-8 bg-gray-200 rounded-full w-full"></div></li>`).join(''); }
     function renderHistoryList(historyData) {
@@ -545,6 +552,9 @@
     function renderStampCard() {
       const stampCardEl = document.getElementById('stampCard');
       if (!stampCardEl) return;
+      
+      // <<< เพิ่ม LOG จุดที่ 3: ตรวจสอบค่าแสตมป์ก่อนที่จะนำไปวาด UI
+      console.log(`[DEBUG] Rendering stamp card with userState.coffeeStamps = ${userState.coffeeStamps}`);
 
       stampCardEl.innerHTML = ''; 
       const stamps = userState.coffeeStamps || 0;
