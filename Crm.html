@@ -78,17 +78,11 @@
 
 <body class="bg-gradient-to-b from-thm-primary via-white to-white min-h-screen relative bg-fixed p-6 text-gray-800">
   <!-- Header -->
-  <!-- MODIFIED: Added a QR code button to the header -->
   <div class="flex justify-between items-center mb-6">
     <h2 id="pageTitle" class="text-xl font-bold text-white"></h2>
     <div class="glass-white rounded-full flex items-center p-1 space-x-2">
-      <button id="showMyQrHeaderBtn" title="แสดง QR Code ของฉัน" class="w-10 h-10 rounded-full flex items-center justify-center hover:bg-white/20 transition-colors">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v1m6 11h-1m-6-11H9m12 0h-1m-4 11h-1M9 4H6a2 2 0 00-2 2v3m12 0V6a2 2 0 00-2-2h-3m-3 11v6a2 2 0 002 2h3a2 2 0 002-2v-3M4 9v6a2 2 0 002 2h3m0 0v-3m0 3h3m-3-3v-3m0-3h3m-6 3h3" />
-          </svg>
-      </button>
       <div id="pointVal" class="font-bold text-white text-lg px-2">0</div>
-      <img id="lineDisplayPicture" class="w-10 h-10 rounded-full object-cover border border-white/50"
+      <img id="lineDisplayPicture" class="w-10 h-10 rounded-full object-cover border border-black"
         src="https://img.daisyui.com/images/stock/photo-1567653418876-5bb0e566e1c2.webp" />
     </div>
   </div>
@@ -135,7 +129,7 @@
     </div>
   </dialog>
 
-  <!-- My QR Code Dialog (for Profile) -->
+  <!-- NEW: My QR Code Dialog (for Profile) -->
   <dialog id="myQrCodeDialog" class="p-0 rounded-lg shadow-xl backdrop:bg-black/50">
       <div class="bg-thm-bg rounded-lg p-6 w-full max-w-sm mx-auto text-center">
           <h3 class="font-bold text-lg mb-2">QR Code ของฉัน</h3>
@@ -270,16 +264,16 @@
                 d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.389-8.389-2.828-2.828z" />
             </svg></button>
         </div>
-        <div class="text-2xl font-bold mb-2 text-white" id="profileDisplayName">กำลังโหลด...</div>
+        <div class="text-2xl font-bold mb-2 text-white" id="profileDisplayName"></div>
         <div class="flex items-center justify-center space-x-2 mb-2"><span id="profileLevelBadge"></span><span id="profileCustomTagBadge"></span></div>
         <div class="w-full bg-thm-accent rounded-full h-2.5">
           <div id="profileProgressBar" class="bg-thm-primary h-2.5 rounded-full" style="width: 0%"></div>
         </div>
         <div id="profilePointsToNextLevel" class="text-sm text-gray-100 mt-1"></div>
-        <div class="text-xl font-bold mt-2 text-white">พ้อยคงเหลือ: <span id="profileCurrentPoints">0</span></div>
-        <div class=" text-sm mt-1 text-gray-200">แต้มสะสมทั้งหมด: <span id="profileTotalPoints">0</span></div>
+        <div class="text-xl font-bold mt-2 text-gray-600">พ้อยคงเหลือ: <span id="profileCurrentPoints">0</span></div>
+        <div class=" text-sm mt-1 text-gray-400">แต้มสะสมทั้งหมด: <span id="profileTotalPoints">0</span></div>
 
-        <!-- Show My QR Code Button -->
+        <!-- NEW: Show My QR Code Button -->
         <div class="mt-6">
             <button id="showMyQrBtn" class="w-full bg-thm-secondary text-white font-bold py-2.5 px-4 rounded-lg hover:bg-thm-secondary-dark transition-colors">
                 แสดง QR CODE
@@ -405,35 +399,6 @@
         okBtn.addEventListener('click', onOk, { once: true }); noBtn.addEventListener('click', onNo, { once: true });
       });
     }
-
-    // MODIFIED: Created a central function to show the user's QR code
-    function showMyQrDialog() {
-        const dialog = document.getElementById('myQrCodeDialog');
-        const container = document.getElementById('myQrcodeContainer');
-
-        if (!dialog || !container) {
-            console.error("My QR Code dialog elements not found.");
-            return;
-        }
-
-        container.innerHTML = ''; // Clear previous QR
-        try {
-            if (!userState.lineId) {
-                showAlert('ข้อผิดพลาด', 'ไม่พบข้อมูลผู้ใช้ (Line ID)');
-                return;
-            }
-            const qr = qrcode(4, 'L');
-            qr.addData(userState.lineId);
-            qr.make();
-            container.innerHTML = qr.createImgTag(6, 4); // cellSize=6, margin=4
-            dialog.showModal();
-        } catch (e) {
-            console.error("Failed to generate QR Code:", e);
-            container.innerHTML = '<p class="text-red-500">เกิดข้อผิดพลาดในการสร้าง QR Code</p>';
-            dialog.showModal();
-        }
-    }
-
 
     // --- DATA & STATE MANAGEMENT ---
     function calculateLevelAndProgress(totalAccumulatedPoints) {
@@ -847,13 +812,35 @@
       const dpEl = document.getElementById('profileDisplayPicture'), dnEl = document.getElementById('profileDisplayName'), lineIdEl = document.getElementById('profileLineId'), levelBadgeEl = document.getElementById('profileLevelBadge'), tagBadgeEl = document.getElementById('profileCustomTagBadge'), progressEl = document.getElementById('profileProgressBar'), progressTextEl = document.getElementById('profilePointsToNextLevel'), totalPointsEl = document.getElementById('profileTotalPoints'), nameEl = document.getElementById('profileName'), phoneEl = document.getElementById('profilePhone'), emailEl = document.getElementById('profileEmail'), addressEl = document.getElementById('profileAddress'), noteEl = document.getElementById('profileNote'), editBtn = document.getElementById('editProfileBtn'), formContainer = document.getElementById('profileFormContainer'), editButtonsDiv = document.getElementById('profileEditButtons'), saveBtn = document.getElementById('saveProfileBtn'), cancelBtn = document.getElementById('cancelEditBtn');
       const editableInputs = [nameEl, phoneEl, emailEl, addressEl, noteEl]; let initialData = {};
 
-      // MODIFIED: Get the profile page's own QR button
+      // NEW: QR Code elements
       const showMyQrBtn = document.getElementById('showMyQrBtn');
-      if (showMyQrBtn) {
-          // MODIFIED: Assign the central function to this button's click event
-          showMyQrBtn.onclick = showMyQrDialog;
+      const myQrCodeDialog = document.getElementById('myQrCodeDialog');
+      const myQrcodeContainer = document.getElementById('myQrcodeContainer');
+      const myQrCodeCloseBtn = document.getElementById('myQrCodeCloseBtn');
+
+      // NEW: Event listener for showing QR Code
+      if (showMyQrBtn && myQrCodeDialog && myQrcodeContainer && myQrCodeCloseBtn) {
+          showMyQrBtn.onclick = () => {
+              myQrcodeContainer.innerHTML = ''; // Clear previous QR
+              try {
+                  const qr = qrcode(4, 'L');
+                  qr.addData(userState.lineId);
+                  qr.make();
+                  myQrcodeContainer.innerHTML = qr.createImgTag(6, 4); // cellSize=6, margin=4
+                  myQrCodeDialog.showModal();
+              } catch (e) {
+                  console.error("Failed to generate QR Code:", e);
+                  myQrcodeContainer.innerHTML = '<p class="text-red-500">เกิดข้อผิดพลาดในการสร้าง QR Code</p>';
+                  myQrCodeDialog.showModal();
+              }
+          };
+
+          myQrCodeCloseBtn.onclick = () => {
+              myQrCodeDialog.close();
+          };
       }
-      
+
+
       // --- Existing profile logic continues below ---
       dpEl.src = userState.profile.pictureUrl || 'https://via.placeholder.com/96';
       dnEl.textContent = userState.profile.displayName || 'ผู้ใช้ LINE';
@@ -1193,28 +1180,10 @@
       qrDialog.showModal();
     }
 
-    // MODIFIED: Function to set up event listeners for global UI elements like the header button
-    function setupGlobalUI() {
-        const showBtn = document.getElementById('showMyQrHeaderBtn');
-        const dialog = document.getElementById('myQrCodeDialog');
-        const closeBtn = document.getElementById('myQrCodeCloseBtn');
-
-        if (showBtn && dialog && closeBtn) {
-            showBtn.onclick = showMyQrDialog;
-            closeBtn.onclick = () => dialog.close();
-        } else {
-            console.warn('Global QR UI elements not fully found.');
-        }
-    }
-
     // --- APP START ---
     async function initializeApp() {
       const liffReady = await ensureLIFFAndFetchInitialData();
       if (!liffReady) return;
-
-      // MODIFIED: Set up global UI elements once after data is ready
-      setupGlobalUI();
-
       window.addEventListener('hashchange', router);
       router();
     }
