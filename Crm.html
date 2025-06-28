@@ -129,6 +129,19 @@
     </div>
   </dialog>
 
+  <!-- NEW: My QR Code Dialog (for Profile) -->
+  <dialog id="myQrCodeDialog" class="p-0 rounded-lg shadow-xl backdrop:bg-black/50">
+      <div class="bg-thm-bg rounded-lg p-6 w-full max-w-sm mx-auto text-center">
+          <h3 class="font-bold text-lg mb-2">QR Code ของฉัน</h3>
+          <p class="text-sm text-gray-600 mb-4">แสดงให้พนักงานเพื่อยืนยันตัวตน</p>
+          <div id="myQrcodeContainer" class="flex justify-center mb-4 p-4 bg-white rounded-lg">
+              <!-- QR Code will be inserted here by JavaScript -->
+          </div>
+          <button id="myQrCodeCloseBtn" class="w-full mt-4 border border-thm-primary text-thm-primary font-bold py-2 px-4 rounded hover:bg-thm-primary hover:text-white transition-colors">ปิด</button>
+      </div>
+  </dialog>
+
+
   <!-- Template: Dashboard (Main Menu) -->
   <template id="view-dashboard">
     <!-- Main Menu -->
@@ -259,6 +272,13 @@
         <div id="profilePointsToNextLevel" class="text-sm text-gray-100 mt-1"></div>
         <div class="text-xl font-bold mt-2 text-white">พ้อยคงเหลือ: <span id="profileCurrentPoints">0</span></div>
         <div class=" text-sm mt-1 text-gray-200">แต้มสะสมทั้งหมด: <span id="profileTotalPoints">0</span></div>
+
+        <!-- NEW: Show My QR Code Button -->
+        <div class="mt-6">
+            <button id="showMyQrBtn" class="w-full bg-thm-secondary text-white font-bold py-2.5 px-4 rounded-lg hover:bg-thm-secondary-dark transition-colors">
+                แสดง QR CODE
+            </button>
+        </div>
 
       </div>
       <div id="profileFormContainer" class="bg-white p-6 rounded-lg shadow-md space-y-4 hidden">
@@ -788,9 +808,40 @@
     }
 
     async function initProfile() {
+      // Original elements
       const dpEl = document.getElementById('profileDisplayPicture'), dnEl = document.getElementById('profileDisplayName'), lineIdEl = document.getElementById('profileLineId'), levelBadgeEl = document.getElementById('profileLevelBadge'), tagBadgeEl = document.getElementById('profileCustomTagBadge'), progressEl = document.getElementById('profileProgressBar'), progressTextEl = document.getElementById('profilePointsToNextLevel'), totalPointsEl = document.getElementById('profileTotalPoints'), nameEl = document.getElementById('profileName'), phoneEl = document.getElementById('profilePhone'), emailEl = document.getElementById('profileEmail'), addressEl = document.getElementById('profileAddress'), noteEl = document.getElementById('profileNote'), editBtn = document.getElementById('editProfileBtn'), formContainer = document.getElementById('profileFormContainer'), editButtonsDiv = document.getElementById('profileEditButtons'), saveBtn = document.getElementById('saveProfileBtn'), cancelBtn = document.getElementById('cancelEditBtn');
       const editableInputs = [nameEl, phoneEl, emailEl, addressEl, noteEl]; let initialData = {};
 
+      // NEW: QR Code elements
+      const showMyQrBtn = document.getElementById('showMyQrBtn');
+      const myQrCodeDialog = document.getElementById('myQrCodeDialog');
+      const myQrcodeContainer = document.getElementById('myQrcodeContainer');
+      const myQrCodeCloseBtn = document.getElementById('myQrCodeCloseBtn');
+
+      // NEW: Event listener for showing QR Code
+      if (showMyQrBtn && myQrCodeDialog && myQrcodeContainer && myQrCodeCloseBtn) {
+          showMyQrBtn.onclick = () => {
+              myQrcodeContainer.innerHTML = ''; // Clear previous QR
+              try {
+                  const qr = qrcode(4, 'L');
+                  qr.addData(userState.lineId);
+                  qr.make();
+                  myQrcodeContainer.innerHTML = qr.createImgTag(6, 4); // cellSize=6, margin=4
+                  myQrCodeDialog.showModal();
+              } catch (e) {
+                  console.error("Failed to generate QR Code:", e);
+                  myQrcodeContainer.innerHTML = '<p class="text-red-500">เกิดข้อผิดพลาดในการสร้าง QR Code</p>';
+                  myQrCodeDialog.showModal();
+              }
+          };
+
+          myQrCodeCloseBtn.onclick = () => {
+              myQrCodeDialog.close();
+          };
+      }
+
+
+      // --- Existing profile logic continues below ---
       dpEl.src = userState.profile.pictureUrl || 'https://via.placeholder.com/96';
       dnEl.textContent = userState.profile.displayName || 'ผู้ใช้ LINE';
       totalPointsEl.textContent = userState.totalPoints.toLocaleString();
