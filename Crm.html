@@ -6,10 +6,9 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>CRM-3RN</title>
-  
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   <!-- Tailwind CSS CDN (without DaisyUI) - MUST BE LOADED FIRST -->
   <script src="https://cdn.tailwindcss.com"></script>
-
   <!-- Tailwind CSS Configuration for CDN -->
   <script>
     tailwind.config = {
@@ -36,27 +35,21 @@
   <script src="https://cdn.jsdelivr.net/npm/qrcode-generator/qrcode.js"></script>
 
   <style>
-    .hidden {
-      display: none !important;
-    }
-
+    body {font-family: 'Barlow', 'Noto Sans Thai', sans-serif;}
+    .hidden {display: none !important;}
     @keyframes glow {
       from {
         text-shadow: 0 0 5px #ff005e, 0 0 10px #ff005e, 0 0 20px #ff005e;
       }
-
       to {
         text-shadow: 0 0 10px #00d4ff, 0 0 20px #00d4ff, 0 0 40px #00d4ff;
       }
     }
-
     @keyframes pulse-opacity {
-
       0%,
       100% {
         opacity: 0.5;
       }
-
       50% {
         opacity: 1;
       }
